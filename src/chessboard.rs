@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 pub const NUM_FILES: usize = 8;
 
 #[derive(Clone, Debug)]
-pub struct Chessboard {
+pub struct ChessBoard {
     pub pieces: VecDeque<[Option<ChessPiece>; NUM_FILES]>,
     pub first_rank: usize,
 }
