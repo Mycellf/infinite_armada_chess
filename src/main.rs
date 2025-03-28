@@ -7,7 +7,7 @@ use macroquad::{
 
 #[macroquad::main("Infinite Armada Chess")]
 async fn main() {
-    const SCREEN_HEIGHT: f32 = 16.0;
+    const SCREEN_HEIGHT: f32 = 8.0;
 
     let mut world_camera = Camera2D {
         zoom: [1.0, -2.0 / SCREEN_HEIGHT].into(),
