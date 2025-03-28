@@ -16,6 +16,14 @@ pub struct ChessPiece {
 }
 
 impl ChessPiece {
+    pub fn new(kind: PieceKind, team: PieceTeam) -> Self {
+        Self {
+            kind,
+            team,
+            num_moves: 0,
+        }
+    }
+
     pub fn increment_moves(&mut self) {
         self.num_moves = self.num_moves.saturating_add(1);
     }
