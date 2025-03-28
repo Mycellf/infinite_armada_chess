@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 pub const NUM_FILES: usize = 8;
+pub const NUM_TRADITIONAL_RANKS: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct ChessBoard {
@@ -46,7 +47,7 @@ impl PieceTeam {
     pub fn pawn_upgrade_rank(self) -> usize {
         match self {
             PieceTeam::Black => 0,
-            PieceTeam::White => 7,
+            PieceTeam::White => NUM_TRADITIONAL_RANKS - 1,
         }
     }
 }
