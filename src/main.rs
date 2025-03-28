@@ -1,3 +1,5 @@
+pub mod chessboard;
+
 use macroquad::{
     camera::{self, Camera2D},
     color::colors,
