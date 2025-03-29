@@ -233,11 +233,11 @@ impl ChessBoard {
         };
 
         for rank in start..end + 1 {
-            self.draw_rank(rank);
+            self.draw_rank(rank, 0);
         }
     }
 
-    pub fn draw_rank(&self, rank: isize) {
+    pub fn draw_rank(&self, rank: isize, mut hightlights: u8) {
         let height = self.height_of_rank(rank);
         let mut tile_parity = rank % 2 == 0;
 
@@ -255,17 +255,15 @@ impl ChessBoard {
                 file as f32 * Self::TILE_SIZE
             };
 
-            shapes::draw_rectangle(
-                tile_x,
-                height,
-                Self::TILE_SIZE,
-                Self::TILE_SIZE,
-                if tile_parity {
-                    Self::DARK_TILE_COLOR
-                } else {
-                    Self::LIGHT_TILE_COLOR
-                },
-            );
+            let tile_color = if hightlights & 1 == 1 {
+                colors::WHITE
+            } else if tile_parity {
+                Self::DARK_TILE_COLOR
+            } else {
+                Self::LIGHT_TILE_COLOR
+            };
+
+            shapes::draw_rectangle(tile_x, height, Self::TILE_SIZE, Self::TILE_SIZE, tile_color);
 
             if let Some(piece) = rank_contents[file] {
                 texture::draw_texture_ex(
@@ -282,6 +280,7 @@ impl ChessBoard {
             }
 
             tile_parity ^= true;
+            hightlights >>= 1;
         }
     }
 
