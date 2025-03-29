@@ -68,6 +68,15 @@ impl ChessBoard {
         self.ranks.len() as isize + self.first_rank()
     }
 
+    pub fn get_piece(&self, [rank, file]: [isize; 2]) -> Option<Option<ChessPiece>> {
+        Some(*self.get_rank(rank)?.get(usize::try_from(file).ok()?)?)
+    }
+
+    pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
+        self.get_rank_mut(rank)?
+            .get_mut(usize::try_from(file).ok()?)
+    }
+
     pub fn get_rank(&self, rank: isize) -> Option<&Rank> {
         self.ranks.get(self.index_of_rank(rank).try_into().ok()?)
     }
