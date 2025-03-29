@@ -12,6 +12,7 @@ type Rank = [Option<ChessPiece>; NUM_FILES];
 pub struct ChessBoard {
     pub ranks: VecDeque<Rank>,
     pub ranks_behind_white: usize,
+    pub turn: PieceTeam,
 }
 
 impl ChessBoard {
@@ -37,7 +38,95 @@ impl ChessBoard {
         Self {
             ranks,
             ranks_behind_white: 2,
+            turn: PieceTeam::White,
         }
+    }
+
+    pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<(), ()> {
+        let turn = self.turn;
+
+        let Some(starting_tile) = self.get_piece_mut(from) else {
+            return Err(());
+        };
+
+        let Some(starting_piece) = starting_tile else {
+            return Err(());
+        };
+
+        if starting_piece.team != turn {
+            return Err(());
+        }
+
+        let moved_tile = Some(starting_piece.moved());
+
+        if !self.check_move(from, to) {
+            return Err(());
+        }
+
+        let Some(ending_tile) = self.get_piece_mut(to) else {
+            return Err(());
+        };
+
+        *ending_tile = moved_tile;
+
+        self.turn = self.turn.opposite();
+
+        Ok(())
+    }
+
+    pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> bool {
+        let Some(Some(starting_piece)) = self.get_piece(from) else {
+            return false;
+        };
+
+        let Some(destination_tile) = self.get_piece(to) else {
+            return false;
+        };
+
+        let offset = [0, 1].map(|i| to[i] - from[i]);
+
+        // find the move being referenced
+        let Some(&piece_move) = (starting_piece.moves().iter())
+            .filter(|&&piece_move| piece_move.is_offset_valid(offset))
+            .next()
+        else {
+            return false;
+        };
+
+        // check that the destination is valid
+        if !(destination_tile.is_some() && piece_move.can_capture
+            || destination_tile.is_none() && piece_move.can_move)
+        {
+            return false;
+        }
+
+        // if the destination tile is another piece, check that it's not an ally
+        if let Some(ChessPiece { team, .. }) = destination_tile {
+            if team == starting_piece.team {
+                return false;
+            }
+        }
+
+        if piece_move.repeating {
+            // check that any intermediate moves are valid
+            let mut tile_index = from;
+
+            loop {
+                for i in [0, 1] {
+                    tile_index[i] += piece_move.offset()[i];
+                }
+
+                if tile_index == to {
+                    break;
+                }
+
+                if self.get_piece(tile_index).unwrap().is_some() {
+                    return false;
+                }
+            }
+        }
+
+        true
     }
 
     pub fn expand_to_rank(&mut self, rank: isize) {
@@ -139,7 +228,7 @@ impl ChessPiece {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PieceTeam {
     Black,
     White,
@@ -161,7 +250,7 @@ impl PieceTeam {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PieceKind {
     Pawn,
     Bishop,
