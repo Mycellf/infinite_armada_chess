@@ -8,14 +8,16 @@ type Rank = [Option<ChessPiece>; NUM_FILES];
 #[derive(Clone, Debug)]
 pub struct ChessBoard {
     pub ranks: VecDeque<Rank>,
-    pub first_rank_index: usize,
+    pub ranks_behind_white: usize,
 }
 
 impl ChessBoard {
     pub fn new() -> Self {
-        let mut ranks = VecDeque::with_capacity(NUM_TRADITIONAL_RANKS + 2);
+        let mut ranks = VecDeque::with_capacity(NUM_TRADITIONAL_RANKS + 4);
 
         ranks.push_front(QUEEN_RANK_WHITE);
+        ranks.push_front(QUEEN_RANK_WHITE);
+
         ranks.push_front(KING_RANK_WHITE);
         ranks.push_front(PAWN_RANK_WHITE);
 
@@ -25,40 +27,42 @@ impl ChessBoard {
 
         ranks.push_front(PAWN_RANK_BLACK);
         ranks.push_front(KING_RANK_BLACK);
+
+        ranks.push_front(QUEEN_RANK_BLACK);
         ranks.push_front(QUEEN_RANK_BLACK);
 
         Self {
             ranks,
-            first_rank_index: 1,
+            ranks_behind_white: 2,
         }
     }
 
     pub fn expand_to_rank(&mut self, rank: isize) {
-        let index = self.index_of_rank(rank);
+        let target = self.index_of_rank(rank);
 
-        if index < 0 {
-            for _ in 0..-index as usize {
+        if target < self.first_rank() {
+            for _ in target..self.first_rank() {
                 self.ranks.push_back(QUEEN_RANK_WHITE);
             }
-        } else if index as usize > self.ranks.len() {
-            for _ in self.ranks.len()..index as usize {
+
+            self.ranks_behind_white = -target as usize;
+        } else if target > self.last_rank() {
+            for _ in self.last_rank()..target {
                 self.ranks.push_front(QUEEN_RANK_BLACK);
             }
         }
     }
 
     pub fn index_of_rank(&self, rank: isize) -> isize {
-        rank.wrapping_add(self.first_rank_index as isize)
+        rank + self.ranks_behind_white as isize
     }
 
-    pub fn index_of_rank_bounded(&self, rank: isize) -> Option<usize> {
-        if -rank as usize > self.first_rank_index
-            || rank.max(0) as usize >= self.first_rank_index + self.ranks.len()
-        {
-            None
-        } else {
-            Some(self.index_of_rank(rank) as usize)
-        }
+    pub fn first_rank(&self) -> isize {
+        -(self.ranks_behind_white as isize)
+    }
+
+    pub fn last_rank(&self) -> isize {
+        self.ranks.len() as isize + self.first_rank()
     }
 }
 
