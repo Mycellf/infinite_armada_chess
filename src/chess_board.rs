@@ -425,7 +425,7 @@ impl PieceMove {
         if self.repeating {
             for i in [0, 1] {
                 if !(self.offset()[i] == 0 || offset[i] % self.offset()[i] == 0)
-                    || offset[i].signum() == self.offset()[i].signum()
+                    || offset[i].signum() != self.offset()[i].signum()
                 {
                     return false;
                 }
