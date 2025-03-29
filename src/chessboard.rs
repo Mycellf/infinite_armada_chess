@@ -216,12 +216,9 @@ impl ChessPiece {
         }
     }
 
-    pub fn increment_moves(&mut self) {
-        self.num_moves = self.num_moves.saturating_add(1);
-    }
-
     pub fn moved(self) -> Self {
         Self {
+            kind: self.kind.moved(),
             num_moves: self.num_moves.saturating_add(1),
             ..self
         }
@@ -252,12 +249,21 @@ impl PieceTeam {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PieceKind {
-    Pawn,
+    Pawn { new: bool },
     Bishop,
     Knight,
     Rook,
     Queen,
     King,
+}
+
+impl PieceKind {
+    pub fn moved(self) -> Self {
+        match self {
+            Self::Pawn { new: _ } => Self::Pawn { new: false },
+            _ => self,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -293,9 +299,10 @@ impl PieceMove {
 impl ChessPiece {
     pub fn moves(&self) -> &[PieceMove] {
         match self.kind {
-            PieceKind::Pawn => match self.team {
-                PieceTeam::Black => &PAWN_MOVES_BLACK,
-                PieceTeam::White => &PAWN_MOVES_WHITE,
+            #[rustfmt::skip]
+            PieceKind::Pawn { new } => match self.team {
+                PieceTeam::Black => if new { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
+                PieceTeam::White => if new { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
             },
             PieceKind::Bishop => &BISHOP_MOVES,
             PieceKind::Knight => &KNIGHT_MOVES,
@@ -321,8 +328,9 @@ static KING_RANK_BLACK: Rank = [
     Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
 ];
 
+#[rustfmt::skip]
 static PAWN_RANK_BLACK: Rank =
-    [Some(ChessPiece::new(PieceKind::Pawn, PieceTeam::Black)); NUM_FILES];
+    [Some(ChessPiece::new(PieceKind::Pawn { new: true }, PieceTeam::Black)); NUM_FILES];
 
 static EMPTY_RANK: Rank = [None; NUM_FILES];
 
@@ -337,7 +345,17 @@ static PAWN_MOVES_BLACK: [PieceMove; 3] = [
     PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false },
 ];
 
+#[rustfmt::skip]
+static PAWN_MOVES_BLACK_NEW: [PieceMove; 4] = [
+    PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false },
+    PieceMove { offset: [-1, 0],  repeating: false, can_capture: false, can_move: true },
+    PieceMove { offset: [-2, 0],  repeating: false, can_capture: false, can_move: true },
+    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false },
+];
+
 static PAWN_MOVES_WHITE: [PieceMove; 3] = invert_moves(PAWN_MOVES_BLACK);
+
+static PAWN_MOVES_WHITE_NEW: [PieceMove; 4] = invert_moves(PAWN_MOVES_BLACK_NEW);
 
 #[rustfmt::skip]
 static BISHOP_MOVES: [PieceMove; 4] = [
