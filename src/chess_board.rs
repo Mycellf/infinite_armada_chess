@@ -70,6 +70,12 @@ impl ChessBoard {
 
         *ending_tile = moved_tile;
 
+        let Some(starting_tile) = self.get_piece_mut(from) else {
+            return Err(());
+        };
+
+        *starting_tile = None;
+
         self.turn = self.turn.opposite();
 
         Ok(())
@@ -222,7 +228,7 @@ impl ChessBoard {
     pub const DARK_TILE_COLOR: Color = Color::from_hex(0xb58863);
     pub const LIGHT_TILE_COLOR: Color = Color::from_hex(0xf0d9b5);
 
-    pub fn draw_ranks(&self, start: f32, end: f32) {
+    pub fn draw_ranks(&self, start: f32, end: f32, highlighted_tile: Option<[isize; 2]>) {
         let lowest = start.floor() as isize;
         let highest = (end - Self::RANK_HEIGHT).ceil() as isize;
 
@@ -233,21 +239,29 @@ impl ChessBoard {
         };
 
         for rank in start..end + 1 {
-            self.draw_rank(rank, 0);
+            let highlights_mask = if let Some(highlighted_tile) = highlighted_tile {
+                if rank == highlighted_tile[0] {
+                    1 << highlighted_tile[1]
+                } else {
+                    0
+                }
+            } else {
+                0
+            };
+
+            self.draw_rank(rank, highlights_mask);
         }
     }
 
     pub fn tile_at_position(&self, position: [f32; 2]) -> [isize; 2] {
-        let rank = (position[1] / Self::RANK_WIDTH).floor() as isize;
+        let rank = (position[1] / Self::RANK_HEIGHT).floor() as isize;
         let file = (position[0] / Self::TILE_SIZE).floor() as isize;
 
-        let rank = if self.turn == PieceTeam::Black {
-            self.invert_rank(rank)
+        if self.turn == PieceTeam::Black {
+            [self.invert_rank(rank), self.invert_file(file)]
         } else {
-            rank
-        };
-
-        [rank, file]
+            [rank, file]
+        }
     }
 
     pub fn tile_at_position_bounded(&self, position: [f32; 2]) -> Option<[isize; 2]> {
@@ -278,7 +292,7 @@ impl ChessBoard {
                 file as f32 * Self::TILE_SIZE
             };
 
-            let tile_color = if hightlights & 1 == 1 {
+            let tile_color = if hightlights_mask & 1 == 1 {
                 colors::WHITE
             } else if tile_parity {
                 Self::DARK_TILE_COLOR
@@ -303,7 +317,7 @@ impl ChessBoard {
             }
 
             tile_parity ^= true;
-            hightlights >>= 1;
+            hightlights_mask >>= 1;
         }
     }
 

@@ -3,7 +3,7 @@ pub mod chess_board;
 use chess_board::ChessBoard;
 use macroquad::{
     camera::{self, Camera2D},
-    input::{self, KeyCode},
+    input::{self, KeyCode, MouseButton},
     time, window,
 };
 
@@ -22,12 +22,15 @@ async fn main() {
     let mut fullscreen = false;
 
     let mut board = ChessBoard::new();
+    let mut selected_tile = None;
 
     loop {
         if input::is_key_pressed(KeyCode::F11) {
             fullscreen ^= true;
             window::set_fullscreen(fullscreen);
         }
+
+        update_camera_aspect_ratio(&mut world_camera);
 
         let input = input::is_key_down(KeyCode::Up) as i8 - input::is_key_down(KeyCode::Down) as i8;
         let speed =
@@ -48,12 +51,40 @@ async fn main() {
             world_camera.target.y = -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
         }
 
-        update_camera_aspect_ratio(&mut world_camera);
+        'outer: {
+            if !input::is_mouse_button_pressed(MouseButton::Left) {
+                break 'outer;
+            }
+
+            let mouse_position = world_camera.screen_to_world(input::mouse_position().into());
+            let clicked_tile = board.tile_at_position_bounded(mouse_position.into());
+
+            let Some(end_tile) = clicked_tile else {
+                selected_tile = None;
+                break 'outer;
+            };
+
+            let Some(start_tile) = selected_tile else {
+                if let Some(Some(selected_piece)) = board.get_piece(end_tile) {
+                    if selected_piece.team == board.turn {
+                        selected_tile = Some(end_tile);
+                    }
+                }
+
+                break 'outer;
+            };
+
+            if let Ok(()) = board.move_piece(start_tile, end_tile) {
+                selected_tile = None;
+            }
+        }
+
         camera::set_camera(&world_camera);
 
         board.draw_ranks(
             world_camera.target.y - SCREEN_HEIGHT / 2.0,
             world_camera.target.y + SCREEN_HEIGHT / 2.0,
+            selected_tile,
         );
 
         window::next_frame().await;
