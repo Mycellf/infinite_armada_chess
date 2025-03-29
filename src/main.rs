@@ -1,4 +1,4 @@
-pub mod chessboard;
+pub mod chess_board;
 
 use macroquad::{
     camera::{self, Camera2D},
