@@ -417,11 +417,13 @@ static KING_MOVES: [PieceMove; 8] = [
     PieceMove { offset: [1, -1],  repeating: false, can_capture: true, can_move: true },
 ];
 
-const fn invert_teams<const N: usize>(pieces: [Option<ChessPiece>; N]) -> [Option<ChessPiece>; N] {
+const fn invert_teams<const N: usize>(
+    mut pieces: [Option<ChessPiece>; N],
+) -> [Option<ChessPiece>; N] {
     let mut i = 0;
 
     while i < pieces.len() {
-        if let Some(mut piece) = pieces[i] {
+        if let Some(piece) = &mut pieces[i] {
             piece.team = piece.team.opposite();
         }
 
