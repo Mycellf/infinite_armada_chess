@@ -137,16 +137,14 @@ impl ChessBoard {
     }
 
     pub fn expand_to_rank(&mut self, rank: isize) {
-        let target = self.index_of_rank(rank);
-
-        if target < self.first_rank() {
-            for _ in target..self.first_rank() {
+        if rank < self.first_rank() {
+            for _ in rank..self.first_rank() {
                 self.ranks.push_front(QUEEN_RANK_WHITE);
             }
 
-            self.ranks_behind_white = -target as usize;
-        } else if target > self.last_rank() {
-            for _ in self.last_rank()..target {
+            self.ranks_behind_white = -rank as usize;
+        } else if rank > self.last_rank() {
+            for _ in self.last_rank()..rank {
                 self.ranks.push_back(QUEEN_RANK_BLACK);
             }
         }
