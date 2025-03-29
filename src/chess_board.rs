@@ -220,7 +220,16 @@ impl ChessBoard {
     pub const DARK_TILE_COLOR: Color = Color::from_hex(0xb58863);
     pub const LIGHT_TILE_COLOR: Color = Color::from_hex(0xf0d9b5);
 
-    pub fn draw_ranks(&self, start: isize, end: isize) {
+    pub fn draw_ranks(&self, start: f32, end: f32) {
+        let lowest = start.floor() as isize;
+        let highest = (end - Self::RANK_HEIGHT).ceil() as isize;
+
+        let (start, end) = if self.turn == PieceTeam::Black {
+            (self.invert_rank(highest), self.invert_rank(lowest))
+        } else {
+            (lowest, highest)
+        };
+
         for rank in start..end + 1 {
             self.draw_rank(rank);
         }
