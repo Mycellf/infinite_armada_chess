@@ -17,27 +17,21 @@ pub struct ChessBoard {
 
 impl ChessBoard {
     pub fn new() -> Self {
-        let mut ranks = VecDeque::with_capacity(NUM_TRADITIONAL_RANKS + 4);
+        let mut ranks = VecDeque::with_capacity(NUM_TRADITIONAL_RANKS);
 
-        ranks.push_front(QUEEN_RANK_WHITE);
-        ranks.push_front(QUEEN_RANK_WHITE);
-
-        ranks.push_front(KING_RANK_WHITE);
-        ranks.push_front(PAWN_RANK_WHITE);
+        ranks.push_back(KING_RANK_WHITE);
+        ranks.push_back(PAWN_RANK_WHITE);
 
         for _ in 0..NUM_TRADITIONAL_RANKS - 4 {
-            ranks.push_front(EMPTY_RANK);
+            ranks.push_back(EMPTY_RANK);
         }
 
-        ranks.push_front(PAWN_RANK_BLACK);
-        ranks.push_front(KING_RANK_BLACK);
-
-        ranks.push_front(QUEEN_RANK_BLACK);
-        ranks.push_front(QUEEN_RANK_BLACK);
+        ranks.push_back(PAWN_RANK_BLACK);
+        ranks.push_back(KING_RANK_BLACK);
 
         Self {
             ranks,
-            ranks_behind_white: 2,
+            ranks_behind_white: 0,
             turn: PieceTeam::White,
         }
     }
@@ -134,13 +128,13 @@ impl ChessBoard {
 
         if target < self.first_rank() {
             for _ in target..self.first_rank() {
-                self.ranks.push_back(QUEEN_RANK_WHITE);
+                self.ranks.push_front(QUEEN_RANK_WHITE);
             }
 
             self.ranks_behind_white = -target as usize;
         } else if target > self.last_rank() {
             for _ in self.last_rank()..target {
-                self.ranks.push_front(QUEEN_RANK_BLACK);
+                self.ranks.push_back(QUEEN_RANK_BLACK);
             }
         }
     }
