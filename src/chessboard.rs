@@ -179,6 +179,28 @@ pub struct PieceMove {
     pub can_move: bool,
 }
 
+impl PieceMove {
+    pub fn offset(self) -> [isize; 2] {
+        self.offset.map(|x| x as isize)
+    }
+
+    pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
+        if self.repeating {
+            for i in [0, 1] {
+                if offset[i] % self.offset()[i] != 0
+                    || offset[i].signum() == self.offset()[i].signum()
+                {
+                    return false;
+                }
+            }
+
+            offset[0] / self.offset()[0] == offset[1] / self.offset()[1]
+        } else {
+            self.offset() == offset
+        }
+    }
+}
+
 impl ChessPiece {
     pub fn moves(&self) -> &[PieceMove] {
         match self.kind {
