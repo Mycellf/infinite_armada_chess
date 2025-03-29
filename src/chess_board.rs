@@ -158,7 +158,7 @@ impl ChessBoard {
     }
 
     pub fn get_piece(&self, [rank, file]: [isize; 2]) -> Option<Option<ChessPiece>> {
-        Some(*self.get_rank(rank)?.get(usize::try_from(file).ok()?)?)
+        Some(*self.get_rank(rank).get(usize::try_from(file).ok()?)?)
     }
 
     pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
@@ -166,8 +166,16 @@ impl ChessBoard {
             .get_mut(usize::try_from(file).ok()?)
     }
 
-    pub fn get_rank(&self, rank: isize) -> Option<&Rank> {
-        self.ranks.get(self.index_of_rank(rank).try_into().ok()?)
+    pub fn get_rank(&self, rank: isize) -> &Rank {
+        let Ok(rank) = self.index_of_rank(rank).try_into() else {
+            // rank is too low
+            return &QUEEN_RANK_WHITE;
+        };
+
+        self.ranks.get(rank).unwrap_or(
+            // rank is too high
+            &QUEEN_RANK_BLACK,
+        )
     }
 
     pub fn get_rank_mut(&mut self, rank: isize) -> Option<&mut Rank> {
@@ -186,13 +194,13 @@ impl Index<isize> for ChessBoard {
     type Output = Rank;
 
     fn index(&self, index: isize) -> &Self::Output {
-        self.get_rank(index).unwrap()
+        self.get_rank(index)
     }
 }
 
 impl IndexMut<isize> for ChessBoard {
     fn index_mut(&mut self, index: isize) -> &mut Self::Output {
-        self.get_rank_mut(index).unwrap()
+        self.get_rank_expanding(index)
     }
 }
 
