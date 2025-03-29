@@ -46,7 +46,7 @@ impl ChessBoard {
     pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<(), ()> {
         let turn = self.turn;
 
-        let Some(starting_tile) = self.get_piece_expanding(from) else {
+        let Some(starting_tile) = self.get_piece(from) else {
             return Err(());
         };
 
