@@ -1,11 +1,13 @@
 use std::{
     collections::VecDeque,
     ops::{Index, IndexMut},
+    sync::LazyLock,
 };
 
 use macroquad::{
     color::{Color, colors},
     shapes,
+    texture::{self, DrawTextureParams, FilterMode, Image, Texture2D},
 };
 
 pub const NUM_FILES: usize = 8;
@@ -263,17 +265,16 @@ impl ChessBoard {
                 },
             );
 
-            if let Some(ChessPiece { team, .. }) = rank_contents[file] {
-                const BORDER: f32 = 0.1;
-
-                shapes::draw_rectangle(
-                    tile_x + BORDER,
-                    height + BORDER,
-                    Self::TILE_SIZE - 2.0 * BORDER,
-                    Self::TILE_SIZE - 2.0 * BORDER,
-                    match team {
-                        PieceTeam::Black => colors::BLACK,
-                        PieceTeam::White => colors::WHITE,
+            if let Some(piece) = rank_contents[file] {
+                texture::draw_texture_ex(
+                    piece.texture(),
+                    tile_x,
+                    height,
+                    colors::WHITE,
+                    DrawTextureParams {
+                        dest_size: Some([Self::TILE_SIZE; 2].into()),
+                        flip_y: true,
+                        ..Default::default()
                     },
                 );
             }
@@ -408,6 +409,27 @@ impl ChessPiece {
             PieceKind::King => &KING_MOVES,
         }
     }
+
+    pub fn texture(&self) -> &Texture2D {
+        match self.team {
+            PieceTeam::Black => match self.kind {
+                PieceKind::Pawn { new: _ } => &BLACK_PAWN_TEXTURE,
+                PieceKind::Bishop => &BLACK_BISHOP_TEXTURE,
+                PieceKind::Knight => &BLACK_KNIGHT_TEXTURE,
+                PieceKind::Rook => &BLACK_ROOK_TEXTURE,
+                PieceKind::Queen => &BLACK_QUEEN_TEXTURE,
+                PieceKind::King => &BLACK_KING_TEXTURE,
+            },
+            PieceTeam::White => match self.kind {
+                PieceKind::Pawn { new: _ } => &WHITE_PAWN_TEXTURE,
+                PieceKind::Bishop => &WHITE_BISHOP_TEXTURE,
+                PieceKind::Knight => &WHITE_KNIGHT_TEXTURE,
+                PieceKind::Rook => &WHITE_ROOK_TEXTURE,
+                PieceKind::Queen => &WHITE_QUEEN_TEXTURE,
+                PieceKind::King => &WHITE_KING_TEXTURE,
+            },
+        }
+    }
 }
 
 static QUEEN_RANK_BLACK: Rank =
@@ -505,6 +527,44 @@ static KING_MOVES: [PieceMove; 8] = [
     PieceMove { offset: [0, -1],  repeating: false, can_capture: true, can_move: true },
     PieceMove { offset: [1, -1],  repeating: false, can_capture: true, can_move: true },
 ];
+
+static BLACK_PAWN_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_pawn.png")));
+static WHITE_PAWN_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_pawn.png")));
+
+static BLACK_BISHOP_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_bishop.png")));
+static WHITE_BISHOP_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_bishop.png")));
+
+static BLACK_KNIGHT_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_knight.png")));
+static WHITE_KNIGHT_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_knight.png")));
+
+static BLACK_ROOK_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_rook.png")));
+static WHITE_ROOK_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_rook.png")));
+
+static BLACK_QUEEN_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_queen.png")));
+static WHITE_QUEEN_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_queen.png")));
+
+static BLACK_KING_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_king.png")));
+static WHITE_KING_TEXTURE: LazyLock<Texture2D> =
+    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_king.png")));
+
+fn texture_from_bytes(bytes: &[u8]) -> Texture2D {
+    let texture = Texture2D::from_image(&Image::from_file_with_format(bytes, None).unwrap());
+
+    texture.set_filter(FilterMode::Nearest);
+
+    texture
+}
 
 const fn invert_teams<const N: usize>(
     mut pieces: [Option<ChessPiece>; N],
