@@ -161,7 +161,7 @@ impl ChessBoard {
     }
 
     pub fn last_rank(&self) -> isize {
-        self.ranks.len() as isize + self.first_rank()
+        self.ranks.len() as isize + self.first_rank() - 1
     }
 
     pub fn invert_rank(&self, rank: isize) -> isize {
