@@ -237,7 +237,30 @@ impl ChessBoard {
         }
     }
 
-    pub fn draw_rank(&self, rank: isize, mut hightlights: u8) {
+    pub fn tile_at_position(&self, position: [f32; 2]) -> [isize; 2] {
+        let rank = (position[1] / Self::RANK_WIDTH).floor() as isize;
+        let file = (position[0] / Self::TILE_SIZE).floor() as isize;
+
+        let rank = if self.turn == PieceTeam::Black {
+            self.invert_rank(rank)
+        } else {
+            rank
+        };
+
+        [rank, file]
+    }
+
+    pub fn tile_at_position_bounded(&self, position: [f32; 2]) -> Option<[isize; 2]> {
+        let [rank, file] = self.tile_at_position(position);
+
+        if file >= 0 && file < NUM_FILES as isize {
+            Some([rank, file])
+        } else {
+            None
+        }
+    }
+
+    pub fn draw_rank(&self, rank: isize, mut hightlights_mask: u8) {
         let height = self.height_of_rank(rank);
         let mut tile_parity = rank % 2 == 0;
 
