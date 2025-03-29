@@ -404,14 +404,18 @@ impl PieceMove {
     pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
         if self.repeating {
             for i in [0, 1] {
-                if offset[i] % self.offset()[i] != 0
+                if !(self.offset()[i] == 0 || offset[i] % self.offset()[i] == 0)
                     || offset[i].signum() == self.offset()[i].signum()
                 {
                     return false;
                 }
             }
 
-            offset[0] / self.offset()[0] == offset[1] / self.offset()[1]
+            if self.offset()[0] == 0 || self.offset()[1] == 0 {
+                true
+            } else {
+                offset[0] / self.offset()[0] == offset[1] / self.offset()[1]
+            }
         } else {
             self.offset() == offset
         }
