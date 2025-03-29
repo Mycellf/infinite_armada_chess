@@ -76,6 +76,7 @@ async fn main() {
 
             if let Ok(()) = board.move_piece(start_tile, end_tile) {
                 selected_tile = None;
+                world_camera.target.y = -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
             }
         }
 
