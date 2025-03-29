@@ -98,7 +98,7 @@ impl IndexMut<isize> for ChessBoard {
     }
 }
 
-pub fn format_file_and_rank(file: usize, rank: isize) -> String {
+pub fn format_file_and_rank([rank, file]: [isize; 2]) -> String {
     format!("{}{}", ('a' as u8 + file as u8) as char, rank + 1)
 }
 
