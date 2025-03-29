@@ -528,14 +528,14 @@ static BISHOP_MOVES: [PieceMove; 4] = [
 
 #[rustfmt::skip]
 static KNIGHT_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [2, 3],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [3, 2],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [2, -3],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [3, -2],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-2, 3],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-3, 2],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-2, -3], repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-3, -2], repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [1, 2],   repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [2, 1],   repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [1, -2],  repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [2, -1],  repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [-1, 2],  repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [-2, 1],  repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [-1, -2], repeating: false, can_capture: true, can_move: true },
+    PieceMove { offset: [-2, -1], repeating: false, can_capture: true, can_move: true },
 ];
 
 #[rustfmt::skip]
