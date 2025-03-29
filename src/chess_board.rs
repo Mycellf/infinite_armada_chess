@@ -46,7 +46,7 @@ impl ChessBoard {
     pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<(), ()> {
         let turn = self.turn;
 
-        let Some(starting_tile) = self.get_piece_mut(from) else {
+        let Some(starting_tile) = self.get_piece_expanding(from) else {
             return Err(());
         };
 
@@ -64,13 +64,13 @@ impl ChessBoard {
             return Err(());
         }
 
-        let Some(ending_tile) = self.get_piece_mut(to) else {
+        let Some(ending_tile) = self.get_piece_expanding(to) else {
             return Err(());
         };
 
         *ending_tile = moved_tile;
 
-        let Some(starting_tile) = self.get_piece_mut(from) else {
+        let Some(starting_tile) = self.get_piece_expanding(from) else {
             return Err(());
         };
 
@@ -178,6 +178,14 @@ impl ChessBoard {
 
     pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
         self.get_rank_mut(rank)?
+            .get_mut(usize::try_from(file).ok()?)
+    }
+
+    pub fn get_piece_expanding(
+        &mut self,
+        [rank, file]: [isize; 2],
+    ) -> Option<&mut Option<ChessPiece>> {
+        self.get_rank_expanding(rank)
             .get_mut(usize::try_from(file).ok()?)
     }
 
