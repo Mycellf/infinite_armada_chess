@@ -1,4 +1,7 @@
-use std::collections::VecDeque;
+use std::{
+    collections::VecDeque,
+    ops::{Index, IndexMut},
+};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
@@ -63,6 +66,35 @@ impl ChessBoard {
 
     pub fn last_rank(&self) -> isize {
         self.ranks.len() as isize + self.first_rank()
+    }
+
+    pub fn get_rank(&self, rank: isize) -> Option<&Rank> {
+        self.ranks.get(self.index_of_rank(rank).try_into().ok()?)
+    }
+
+    pub fn get_rank_mut(&mut self, rank: isize) -> Option<&mut Rank> {
+        self.ranks
+            .get_mut(self.index_of_rank(rank).try_into().ok()?)
+    }
+
+    pub fn get_rank_expanding(&mut self, rank: isize) -> &mut Rank {
+        self.expand_to_rank(rank);
+
+        self.get_rank_mut(rank).unwrap()
+    }
+}
+
+impl Index<isize> for ChessBoard {
+    type Output = Rank;
+
+    fn index(&self, index: isize) -> &Self::Output {
+        self.get_rank(index).unwrap()
+    }
+}
+
+impl IndexMut<isize> for ChessBoard {
+    fn index_mut(&mut self, index: isize) -> &mut Self::Output {
+        self.get_rank_mut(index).unwrap()
     }
 }
 
