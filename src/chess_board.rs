@@ -167,15 +167,15 @@ impl ChessBoard {
     }
 
     pub fn get_rank(&self, rank: isize) -> &Rank {
-        let Ok(rank) = self.index_of_rank(rank).try_into() else {
+        if let Ok(rank_index) = self.index_of_rank(rank).try_into() {
+            self.ranks.get(rank_index).unwrap_or(
+                // rank is too high
+                &QUEEN_RANK_BLACK,
+            )
+        } else {
             // rank is too low
-            return &QUEEN_RANK_WHITE;
-        };
-
-        self.ranks.get(rank).unwrap_or(
-            // rank is too high
-            &QUEEN_RANK_BLACK,
-        )
+            &QUEEN_RANK_WHITE
+        }
     }
 
     pub fn get_rank_mut(&mut self, rank: isize) -> Option<&mut Rank> {
