@@ -10,11 +10,11 @@ use macroquad::{
 #[macroquad::main("Infinite Armada Chess")]
 async fn main() {
     const SCREEN_HEIGHT: f32 = 9.5;
-    const SCREEN_START_POSITION: f32 = -(SCREEN_HEIGHT - 8.0) / 2.0;
+    const SCREEN_START_POSITION: f32 =
+        chess_board::NUM_TRADITIONAL_RANKS as f32 / 2.0 * ChessBoard::RANK_HEIGHT;
 
     let mut world_camera = Camera2D {
         zoom: [1.0, -2.0 / SCREEN_HEIGHT].into(),
-        offset: [0.0, -1.0].into(),
         target: [ChessBoard::RANK_WIDTH / 2.0, SCREEN_START_POSITION].into(),
         ..Default::default()
     };
@@ -51,7 +51,10 @@ async fn main() {
         update_camera_aspect_ratio(&mut world_camera);
         camera::set_camera(&world_camera);
 
-        board.draw_ranks(world_camera.target.y, world_camera.target.y + SCREEN_HEIGHT);
+        board.draw_ranks(
+            world_camera.target.y - SCREEN_HEIGHT / 2.0,
+            world_camera.target.y + SCREEN_HEIGHT / 2.0,
+        );
 
         window::next_frame().await;
     }
