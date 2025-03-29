@@ -25,7 +25,7 @@ impl ChessBoard {
         ranks.push_front(KING_RANK_WHITE);
         ranks.push_front(PAWN_RANK_WHITE);
 
-        for _ in 0..NUM_TRADITIONAL_RANKS - 2 {
+        for _ in 0..NUM_TRADITIONAL_RANKS - 4 {
             ranks.push_front(EMPTY_RANK);
         }
 
