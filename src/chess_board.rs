@@ -244,14 +244,16 @@ impl ChessBoard {
         let rank_contents = self.get_rank(rank);
 
         for file in 0..NUM_FILES {
-            let file = if PieceTeam::Black == self.turn {
-                // if file is in the range 0..NUM_FILES, it will remain in that range when flipped
-                self.invert_file(file as isize) as usize
-            } else {
-                file
-            };
+            let tile_x = {
+                let file = if PieceTeam::Black == self.turn {
+                    // if file is in the range 0..NUM_FILES, it will remain in that range when flipped
+                    self.invert_file(file as isize) as usize
+                } else {
+                    file
+                };
 
-            let tile_x = file as f32 * Self::TILE_SIZE;
+                file as f32 * Self::TILE_SIZE
+            };
 
             shapes::draw_rectangle(
                 tile_x,
