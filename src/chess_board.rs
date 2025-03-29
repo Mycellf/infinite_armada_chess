@@ -3,6 +3,11 @@ use std::{
     ops::{Index, IndexMut},
 };
 
+use macroquad::{
+    color::{Color, colors},
+    shapes,
+};
+
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
 
@@ -151,6 +156,14 @@ impl ChessBoard {
         self.ranks.len() as isize + self.first_rank()
     }
 
+    pub fn invert_rank(&self, rank: isize) -> isize {
+        NUM_TRADITIONAL_RANKS as isize - rank - 1
+    }
+
+    pub fn invert_file(&self, file: isize) -> isize {
+        NUM_FILES as isize - file - 1
+    }
+
     pub fn get_piece(&self, [rank, file]: [isize; 2]) -> Option<Option<ChessPiece>> {
         Some(*self.get_rank(rank).get(usize::try_from(file).ok()?)?)
     }
@@ -195,6 +208,79 @@ impl Index<isize> for ChessBoard {
 impl IndexMut<isize> for ChessBoard {
     fn index_mut(&mut self, index: isize) -> &mut Self::Output {
         self.get_rank_expanding(index)
+    }
+}
+
+impl ChessBoard {
+    pub const TILE_SIZE: f32 = 1.0;
+    pub const RANK_HEIGHT: f32 = Self::TILE_SIZE;
+    pub const RANK_WIDTH: f32 = Self::TILE_SIZE * NUM_FILES as f32;
+
+    // colors from the palette used by lichess.org
+    pub const DARK_TILE_COLOR: Color = Color::from_hex(0xb58863);
+    pub const LIGHT_TILE_COLOR: Color = Color::from_hex(0xf0d9b5);
+
+    pub fn draw_ranks(&self, start: isize, end: isize) {
+        for rank in start..end + 1 {
+            self.draw_rank(rank);
+        }
+    }
+
+    pub fn draw_rank(&self, rank: isize) {
+        let height = self.height_of_rank(rank);
+        let mut tile_parity = rank % 2 == 0;
+
+        let rank_contents = self.get_rank(rank);
+
+        for file in 0..NUM_FILES {
+            let file = if PieceTeam::Black == self.turn {
+                // if file is in the range 0..NUM_FILES, it will remain in that range when flipped
+                self.invert_file(file as isize) as usize
+            } else {
+                file
+            };
+
+            let tile_x = file as f32 * Self::TILE_SIZE;
+
+            shapes::draw_rectangle(
+                tile_x,
+                height,
+                Self::TILE_SIZE,
+                Self::TILE_SIZE,
+                if tile_parity {
+                    Self::DARK_TILE_COLOR
+                } else {
+                    Self::LIGHT_TILE_COLOR
+                },
+            );
+
+            if let Some(ChessPiece { team, .. }) = rank_contents[file] {
+                const BORDER: f32 = 0.1;
+
+                shapes::draw_rectangle(
+                    tile_x + BORDER,
+                    height + BORDER,
+                    Self::TILE_SIZE - 2.0 * BORDER,
+                    Self::TILE_SIZE - 2.0 * BORDER,
+                    match team {
+                        PieceTeam::Black => colors::BLACK,
+                        PieceTeam::White => colors::WHITE,
+                    },
+                );
+            }
+
+            tile_parity ^= true;
+        }
+    }
+
+    pub fn height_of_rank(&self, rank: isize) -> f32 {
+        let rank = if let PieceTeam::Black = self.turn {
+            self.invert_rank(rank)
+        } else {
+            rank
+        };
+
+        rank as f32 * Self::RANK_HEIGHT
     }
 }
 
