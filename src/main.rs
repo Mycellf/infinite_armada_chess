@@ -46,7 +46,7 @@ async fn main() {
         world_camera.target.y += input::mouse_wheel().1 * scroll_speed
             + input as f32 * pan_speed * time::get_frame_time();
 
-        if input::is_key_pressed(KeyCode::C) {
+        if input::is_key_pressed(KeyCode::Home) {
             world_camera.target.y = SCREEN_START_POSITION;
         }
 
