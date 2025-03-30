@@ -47,11 +47,6 @@ async fn main() {
             world_camera.target.y = SCREEN_START_POSITION;
         }
 
-        if input::is_key_pressed(KeyCode::Space) {
-            board.turn = board.turn.opposite();
-            world_camera.target.y = -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
-        }
-
         'outer: {
             if !input::is_mouse_button_pressed(MouseButton::Left) {
                 break 'outer;
