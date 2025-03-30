@@ -6,6 +6,7 @@ use std::{
 use macroquad::{
     color::{Color, colors},
     shapes,
+    text::{self, TextDimensions, TextParams},
     texture::{self, DrawTextureParams},
 };
 
@@ -326,6 +327,16 @@ impl ChessBoard {
             tile_parity ^= true;
             hightlights_mask >>= 1;
         }
+
+        let color = colors::GRAY;
+        let rank_string = (rank + 1).to_string();
+        let size = 0.4;
+
+        let center_y = height + Self::RANK_HEIGHT / 2.0;
+
+        draw_boxed_text(&rank_string, 0.0, center_y, size, [1.0, 0.5], color);
+        #[rustfmt::skip]
+        draw_boxed_text(&rank_string, Self::RANK_WIDTH, center_y, size, [0.0, 0.5], color);
     }
 
     pub fn height_of_rank(&self, rank: isize) -> f32 {
@@ -337,6 +348,37 @@ impl ChessBoard {
 
         rank as f32 * Self::RANK_HEIGHT
     }
+}
+
+// Align of 0.0 means left align, align of 1.0 means right align
+fn draw_boxed_text(text: &str, x: f32, y: f32, size: f32, align: [f32; 2], color: Color) {
+    let (font_size, font_scale, _) = text::camera_font_scale(size);
+
+    let horizontal_offset: f32 = size / 4.0;
+    let vertical_offset: f32 = size / 4.0;
+
+    let TextDimensions { width, .. } = text::measure_text(text, None, font_size, font_scale);
+
+    let box_width: f32 = horizontal_offset * 2.0 + width;
+    let box_height: f32 = size;
+
+    let x = x - box_width * align[0];
+    let y = y - box_height * align[1];
+
+    shapes::draw_rectangle(x, y, box_width, box_height, colors::BLACK);
+
+    text::draw_text_ex(
+        &text,
+        x + horizontal_offset,
+        y + vertical_offset,
+        TextParams {
+            font_size,
+            font_scale: -font_scale,
+            font_scale_aspect: -1.0,
+            color,
+            ..Default::default()
+        },
+    );
 }
 
 static QUEEN_RANK_BLACK: Rank =
