@@ -36,6 +36,9 @@ impl CommandInput {
             let result = MoveCommand::from_command(&self.command);
             self.command.clear();
             result
+        } else if input::is_key_pressed(KeyCode::Escape) {
+            self.command.clear();
+            None
         } else {
             None
         }
