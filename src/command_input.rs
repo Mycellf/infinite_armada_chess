@@ -118,6 +118,10 @@ impl MoveCommand {
             return None;
         };
 
+        let None = locations.next() else {
+            return None;
+        };
+
         Some(Self::MovePiece { start, end })
     }
 }
