@@ -48,7 +48,7 @@ impl CommandInput {
 
         let font_ui_size: f32 = 0.5;
 
-        let (font_size, font_scale, font_scale_aspect) = text::camera_font_scale(font_ui_size);
+        let (font_size, font_scale, _) = text::camera_font_scale(font_ui_size);
 
         let box_height: f32 = font_ui_size;
         let cursor_height: f32 = font_ui_size * 3.0 / 4.0;
@@ -56,18 +56,8 @@ impl CommandInput {
         let horizontal_offset: f32 = font_ui_size / 4.0;
         let vertical_offset: f32 = font_ui_size / 4.0;
 
-        let TextDimensions { width, .. } = text::draw_text_ex(
-            &self.command,
-            horizontal_offset,
-            -vertical_offset,
-            TextParams {
-                font_size,
-                font_scale,
-                font_scale_aspect,
-                color: colors::BLANK,
-                ..Default::default()
-            },
-        );
+        let TextDimensions { width, .. } =
+            text::measure_text(&self.command, None, font_size, font_scale);
 
         shapes::draw_rectangle(
             0.0,
@@ -94,7 +84,6 @@ impl CommandInput {
             TextParams {
                 font_size,
                 font_scale,
-                font_scale_aspect,
                 color: colors::WHITE,
                 ..Default::default()
             },
