@@ -111,6 +111,14 @@ async fn main() {
                         command_input.command.clear();
                     }
                 }
+                MoveCommand::MoveView { rank } => {
+                    world_camera.target.y = (rank as f32 + 0.5) * ChessBoard::RANK_HEIGHT;
+                    command_input.command.clear();
+                }
+                MoveCommand::Home => {
+                    world_camera.target.y = SCREEN_START_POSITION;
+                    command_input.command.clear();
+                }
             }
         }
 

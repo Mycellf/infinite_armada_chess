@@ -23,6 +23,8 @@ impl CommandInput {
                     self.command.pop();
                 }
                 character => {
+                    let character = character.to_ascii_lowercase();
+
                     if self.command.len() < Self::MAX_COMMAND_LENGTH
                         && self.is_next_character_valid(character)
                     {
@@ -48,16 +50,20 @@ impl CommandInput {
 
     pub fn is_next_character_valid(&self, character: char) -> bool {
         let Some(last_character) = self.last_character() else {
-            return is_valid_file(character);
+            return character == ':' || is_valid_file(character);
         };
 
-        if character == ' ' && self.command.split_whitespace().count() >= 2 {
+        let first_character = self.command.chars().next().unwrap();
+
+        if character == ' '
+            && (first_character == ':' || self.command.split_whitespace().count() >= 2)
+        {
             return false;
         }
 
         if last_character == ' ' {
             is_valid_file(character)
-        } else if is_valid_file(last_character) {
+        } else if last_character == ':' || is_valid_file(last_character) {
             character.is_ascii_digit() || character == '-'
         } else if last_character.is_ascii_digit() || last_character == '-' {
             character.is_ascii_digit() || character == ' '
@@ -122,25 +128,48 @@ fn is_valid_file(character: char) -> bool {
 
 pub enum MoveCommand {
     MovePiece { start: [isize; 2], end: [isize; 2] },
+    MoveView { rank: isize },
+    Home,
 }
 
 impl MoveCommand {
     pub fn from_command(command: &str) -> Option<Self> {
-        let mut locations = command.split_whitespace().map(parse_position);
+        let tokens = command.split_whitespace();
 
-        let Some(Some(start)) = locations.next() else {
-            return None;
-        };
+        if command.chars().next() == Some(':') {
+            Self::parse_view_command(tokens)
+        } else {
+            Self::parse_move_command(tokens)
+        }
+    }
 
-        let Some(Some(end)) = locations.next() else {
-            return None;
-        };
+    fn parse_move_command<'a>(mut tokens: impl Iterator<Item = &'a str>) -> Option<Self> {
+        let start = parse_position(tokens.next()?)?;
+        let end = parse_position(tokens.next()?)?;
 
-        let None = locations.next() else {
+        let None = tokens.next() else {
             return None;
         };
 
         Some(Self::MovePiece { start, end })
+    }
+
+    fn parse_view_command<'a>(mut tokens: impl Iterator<Item = &'a str>) -> Option<Self> {
+        let (":", destination) = tokens.next()?.split_at(1) else {
+            return None;
+        };
+
+        let None = tokens.next() else {
+            return None;
+        };
+
+        if destination.is_empty() {
+            Some(Self::Home)
+        } else {
+            Some(Self::MoveView {
+                rank: destination.parse::<isize>().ok()? - 1,
+            })
+        }
     }
 }
 
