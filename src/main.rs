@@ -3,6 +3,7 @@ pub mod chess_piece;
 pub mod command_input;
 
 use chess_board::ChessBoard;
+use chess_piece::PieceTeam;
 use command_input::{CommandInput, MoveCommand};
 use macroquad::{
     camera::{self, Camera2D},
@@ -76,13 +77,22 @@ async fn main() {
             };
 
             let Some(start_tile) = selected_tile else {
-                if let Some(selected_piece) = board.get_piece(end_tile).unwrap() {
-                    if selected_piece.team == board.turn {
-                        selected_tile = Some(end_tile);
+                let mut end_tile = end_tile;
+
+                #[rustfmt::skip]
+                let offset = if board.turn == PieceTeam::Black { 1 } else { -1 };
+
+                loop {
+                    if let Some(selected_piece) = board.get_piece(end_tile).unwrap() {
+                        if selected_piece.team == board.turn {
+                            selected_tile = Some(end_tile);
+                        }
+
+                        break 'outer;
+                    } else {
+                        end_tile[0] += offset;
                     }
                 }
-
-                break 'outer;
             };
 
             if let Ok(()) = board.move_piece(start_tile, end_tile) {
