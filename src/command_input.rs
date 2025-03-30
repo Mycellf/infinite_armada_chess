@@ -22,25 +22,47 @@ impl CommandInput {
                 '\x08' => {
                     self.command.pop();
                 }
-                other => {
-                    if (other.is_ascii_graphic() || (other == ' ' && !self.command.is_empty()))
-                        && self.command.len() < Self::MAX_COMMAND_LENGTH
+                character => {
+                    if self.command.len() < Self::MAX_COMMAND_LENGTH
+                        && self.is_next_character_valid(character)
                     {
-                        self.command.push(other);
+                        self.command.push(character);
                     }
                 }
             }
         }
 
         if input::is_key_pressed(KeyCode::Enter) {
-            let result = MoveCommand::from_command(&self.command);
-            self.command.clear();
-            result
+            MoveCommand::from_command(&self.command)
         } else if input::is_key_pressed(KeyCode::Escape) {
             self.command.clear();
             None
         } else {
             None
+        }
+    }
+
+    pub fn last_character(&self) -> Option<char> {
+        self.command.chars().rev().next()
+    }
+
+    pub fn is_next_character_valid(&self, character: char) -> bool {
+        let Some(last_character) = self.last_character() else {
+            return is_valid_file(character);
+        };
+
+        if character == ' ' && self.command.split_whitespace().count() >= 2 {
+            return false;
+        }
+
+        if last_character == ' ' {
+            is_valid_file(character)
+        } else if is_valid_file(last_character) {
+            character.is_ascii_digit() || character == '-'
+        } else if last_character.is_ascii_digit() || last_character == '-' {
+            character.is_ascii_digit() || character == ' '
+        } else {
+            false
         }
     }
 
@@ -94,6 +116,10 @@ impl CommandInput {
     }
 }
 
+fn is_valid_file(character: char) -> bool {
+    character >= 'a' && character < ('a' as u8 + chess_board::NUM_FILES as u8) as char
+}
+
 pub enum MoveCommand {
     MovePiece { start: [isize; 2], end: [isize; 2] },
 }
@@ -122,7 +148,7 @@ pub fn parse_position(position: &str) -> Option<[isize; 2]> {
     let file = position.chars().next().unwrap();
     let rank = &position[1..];
 
-    if file < 'a' || file >= ('a' as u8 + chess_board::NUM_FILES as u8) as char {
+    if !is_valid_file(file) {
         return None;
     }
 

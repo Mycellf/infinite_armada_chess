@@ -108,6 +108,7 @@ async fn main() {
                     if let Ok(()) = board.move_piece(start, end) {
                         world_camera.target.y =
                             -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                        command_input.command.clear();
                     }
                 }
             }
