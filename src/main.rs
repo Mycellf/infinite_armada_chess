@@ -1,7 +1,9 @@
 pub mod chess_board;
 pub mod chess_piece;
+pub mod command_input;
 
 use chess_board::ChessBoard;
+use command_input::{CommandInput, MoveCommand};
 use macroquad::{
     camera::{self, Camera2D},
     input::{self, KeyCode, MouseButton},
@@ -20,10 +22,18 @@ async fn main() {
         ..Default::default()
     };
 
+    let mut ui_camera = Camera2D {
+        zoom: [1.0, 2.0 / 10.0].into(),
+        offset: [-1.0, -1.0].into(),
+        ..Default::default()
+    };
+
     let mut fullscreen = false;
 
     let mut board = ChessBoard::new();
     let mut selected_tile = None;
+
+    let mut command_input = CommandInput::default();
 
     loop {
         if input::is_key_pressed(KeyCode::F11) {
@@ -32,6 +42,7 @@ async fn main() {
         }
 
         update_camera_aspect_ratio(&mut world_camera);
+        update_camera_aspect_ratio(&mut ui_camera);
 
         let input = input::is_key_down(KeyCode::Up) as i8 - input::is_key_down(KeyCode::Down) as i8;
         let pan_speed =
@@ -81,6 +92,17 @@ async fn main() {
             selected_tile = None;
         }
 
+        if let Some(command) = command_input.update() {
+            match command {
+                MoveCommand::MovePiece { start, end } => {
+                    if let Ok(()) = board.move_piece(start, end) {
+                        world_camera.target.y =
+                            -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                    }
+                }
+            }
+        }
+
         camera::set_camera(&world_camera);
 
         board.draw_ranks(
@@ -88,6 +110,10 @@ async fn main() {
             world_camera.target.y + SCREEN_HEIGHT / 2.0,
             selected_tile,
         );
+
+        camera::set_camera(&ui_camera);
+
+        command_input.draw();
 
         window::next_frame().await;
     }
