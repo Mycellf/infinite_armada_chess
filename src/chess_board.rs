@@ -1,19 +1,20 @@
 use std::{
     collections::VecDeque,
     ops::{Index, IndexMut},
-    sync::LazyLock,
 };
 
 use macroquad::{
     color::{Color, colors},
     shapes,
-    texture::{self, DrawTextureParams, FilterMode, Image, Texture2D},
+    texture::{self, DrawTextureParams},
 };
+
+use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
 
-type Rank = [Option<ChessPiece>; NUM_FILES];
+pub type Rank = [Option<ChessPiece>; NUM_FILES];
 
 #[derive(Clone, Debug)]
 pub struct ChessBoard {
@@ -342,144 +343,6 @@ pub fn format_file_and_rank([rank, file]: [isize; 2]) -> String {
     format!("{}{}", ('a' as u8 + file as u8) as char, rank + 1)
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct ChessPiece {
-    pub kind: PieceKind,
-    pub team: PieceTeam,
-    pub num_moves: u16,
-}
-
-impl ChessPiece {
-    pub const fn new(kind: PieceKind, team: PieceTeam) -> Self {
-        Self {
-            kind,
-            team,
-            num_moves: 0,
-        }
-    }
-
-    pub fn moved(self) -> Self {
-        Self {
-            kind: self.kind.moved(),
-            num_moves: self.num_moves.saturating_add(1),
-            ..self
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PieceTeam {
-    Black,
-    White,
-}
-
-impl PieceTeam {
-    pub const fn pawn_upgrade_rank(self) -> usize {
-        match self {
-            PieceTeam::Black => 0,
-            PieceTeam::White => NUM_TRADITIONAL_RANKS - 1,
-        }
-    }
-
-    pub const fn opposite(self) -> Self {
-        match self {
-            PieceTeam::Black => PieceTeam::White,
-            PieceTeam::White => PieceTeam::Black,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PieceKind {
-    Pawn { new: bool },
-    Bishop,
-    Knight,
-    Rook,
-    Queen,
-    King,
-}
-
-impl PieceKind {
-    pub fn moved(self) -> Self {
-        match self {
-            Self::Pawn { new: _ } => Self::Pawn { new: false },
-            _ => self,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct PieceMove {
-    pub offset: [i8; 2],
-    pub repeating: bool,
-    pub can_capture: bool,
-    pub can_move: bool,
-}
-
-impl PieceMove {
-    pub fn offset(self) -> [isize; 2] {
-        self.offset.map(|x| x as isize)
-    }
-
-    pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
-        if self.repeating {
-            for i in [0, 1] {
-                if !(self.offset()[i] == 0 || offset[i] % self.offset()[i] == 0)
-                    || offset[i].signum() != self.offset()[i].signum()
-                {
-                    return false;
-                }
-            }
-
-            if self.offset()[0] == 0 || self.offset()[1] == 0 {
-                true
-            } else {
-                offset[0] / self.offset()[0] == offset[1] / self.offset()[1]
-            }
-        } else {
-            self.offset() == offset
-        }
-    }
-}
-
-impl ChessPiece {
-    pub fn moves(&self) -> &[PieceMove] {
-        match self.kind {
-            #[rustfmt::skip]
-            PieceKind::Pawn { new } => match self.team {
-                PieceTeam::Black => if new { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
-                PieceTeam::White => if new { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
-            },
-            PieceKind::Bishop => &BISHOP_MOVES,
-            PieceKind::Knight => &KNIGHT_MOVES,
-            PieceKind::Rook => &ROOK_MOVES,
-            PieceKind::Queen => &QUEEN_MOVES,
-            PieceKind::King => &KING_MOVES,
-        }
-    }
-
-    pub fn texture(&self) -> &Texture2D {
-        match self.team {
-            PieceTeam::Black => match self.kind {
-                PieceKind::Pawn { new: _ } => &BLACK_PAWN_TEXTURE,
-                PieceKind::Bishop => &BLACK_BISHOP_TEXTURE,
-                PieceKind::Knight => &BLACK_KNIGHT_TEXTURE,
-                PieceKind::Rook => &BLACK_ROOK_TEXTURE,
-                PieceKind::Queen => &BLACK_QUEEN_TEXTURE,
-                PieceKind::King => &BLACK_KING_TEXTURE,
-            },
-            PieceTeam::White => match self.kind {
-                PieceKind::Pawn { new: _ } => &WHITE_PAWN_TEXTURE,
-                PieceKind::Bishop => &WHITE_BISHOP_TEXTURE,
-                PieceKind::Knight => &WHITE_KNIGHT_TEXTURE,
-                PieceKind::Rook => &WHITE_ROOK_TEXTURE,
-                PieceKind::Queen => &WHITE_QUEEN_TEXTURE,
-                PieceKind::King => &WHITE_KING_TEXTURE,
-            },
-        }
-    }
-}
-
 static QUEEN_RANK_BLACK: Rank =
     [Some(ChessPiece::new(PieceKind::Queen, PieceTeam::Black)); NUM_FILES];
 
@@ -505,115 +368,6 @@ static PAWN_RANK_WHITE: Rank = invert_teams(PAWN_RANK_BLACK);
 static KING_RANK_WHITE: Rank = invert_teams(KING_RANK_BLACK);
 static QUEEN_RANK_WHITE: Rank = invert_teams(QUEEN_RANK_BLACK);
 
-#[rustfmt::skip]
-static PAWN_MOVES_BLACK: [PieceMove; 3] = [
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: false, can_move: true },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false },
-];
-
-#[rustfmt::skip]
-static PAWN_MOVES_BLACK_NEW: [PieceMove; 4] = [
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: false, can_move: true },
-    PieceMove { offset: [-2, 0],  repeating: false, can_capture: false, can_move: true },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false },
-];
-
-static PAWN_MOVES_WHITE: [PieceMove; 3] = invert_moves(PAWN_MOVES_BLACK);
-
-static PAWN_MOVES_WHITE_NEW: [PieceMove; 4] = invert_moves(PAWN_MOVES_BLACK_NEW);
-
-#[rustfmt::skip]
-static BISHOP_MOVES: [PieceMove; 4] = [
-    PieceMove { offset: [1, 1],   repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [1, -1],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 1],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, -1], repeating: true, can_capture: true, can_move: true },
-];
-
-#[rustfmt::skip]
-static KNIGHT_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 2],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [2, 1],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [1, -2],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [2, -1],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 2],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-2, 1],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, -2], repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-2, -1], repeating: false, can_capture: true, can_move: true },
-];
-
-#[rustfmt::skip]
-static ROOK_MOVES: [PieceMove; 4] = [
-    PieceMove { offset: [1, 0],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [0, 1],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 0], repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [0, -1], repeating: true, can_capture: true, can_move: true },
-];
-
-#[rustfmt::skip]
-static QUEEN_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 0],   repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [1, 1],   repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [0, 1],   repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 1],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 0],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, -1], repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [0, -1],  repeating: true, can_capture: true, can_move: true },
-    PieceMove { offset: [1, -1],  repeating: true, can_capture: true, can_move: true },
-];
-
-#[rustfmt::skip]
-static KING_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 0],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [1, 1],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [0, 1],   repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [0, -1],  repeating: false, can_capture: true, can_move: true },
-    PieceMove { offset: [1, -1],  repeating: false, can_capture: true, can_move: true },
-];
-
-static BLACK_PAWN_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_pawn.png")));
-static WHITE_PAWN_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_pawn.png")));
-
-static BLACK_BISHOP_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_bishop.png")));
-static WHITE_BISHOP_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_bishop.png")));
-
-static BLACK_KNIGHT_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_knight.png")));
-static WHITE_KNIGHT_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_knight.png")));
-
-static BLACK_ROOK_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_rook.png")));
-static WHITE_ROOK_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_rook.png")));
-
-static BLACK_QUEEN_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_queen.png")));
-static WHITE_QUEEN_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_queen.png")));
-
-static BLACK_KING_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/black_king.png")));
-static WHITE_KING_TEXTURE: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/pieces/white_king.png")));
-
-fn texture_from_bytes(bytes: &[u8]) -> Texture2D {
-    let texture = Texture2D::from_image(&Image::from_file_with_format(bytes, None).unwrap());
-
-    texture.set_filter(FilterMode::Nearest);
-
-    texture
-}
-
 const fn invert_teams<const N: usize>(
     mut pieces: [Option<ChessPiece>; N],
 ) -> [Option<ChessPiece>; N] {
@@ -628,16 +382,4 @@ const fn invert_teams<const N: usize>(
     }
 
     pieces
-}
-
-const fn invert_moves<const N: usize>(mut moves: [PieceMove; N]) -> [PieceMove; N] {
-    let mut i = 0;
-
-    while i < moves.len() {
-        moves[i].offset[0] = -moves[i].offset[0];
-
-        i += 1;
-    }
-
-    moves
 }
