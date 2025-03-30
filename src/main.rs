@@ -34,14 +34,17 @@ async fn main() {
         update_camera_aspect_ratio(&mut world_camera);
 
         let input = input::is_key_down(KeyCode::Up) as i8 - input::is_key_down(KeyCode::Down) as i8;
-        let speed =
+        let pan_speed =
             if input::is_key_down(KeyCode::LeftShift) || input::is_key_down(KeyCode::RightShift) {
                 16.0
             } else {
                 4.0
             };
 
-        world_camera.target.y += input as f32 * speed * time::get_frame_time();
+        let scroll_speed = 0.5;
+
+        world_camera.target.y += input::mouse_wheel().1 * scroll_speed
+            + input as f32 * pan_speed * time::get_frame_time();
 
         if input::is_key_pressed(KeyCode::C) {
             world_camera.target.y = SCREEN_START_POSITION;
