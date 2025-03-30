@@ -339,10 +339,6 @@ impl ChessBoard {
     }
 }
 
-pub fn format_file_and_rank([rank, file]: [isize; 2]) -> String {
-    format!("{}{}", ('a' as u8 + file as u8) as char, rank + 1)
-}
-
 static QUEEN_RANK_BLACK: Rank =
     [Some(ChessPiece::new(PieceKind::Queen, PieceTeam::Black)); NUM_FILES];
 
