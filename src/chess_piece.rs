@@ -85,6 +85,8 @@ impl PieceMove {
     pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
         if self.repeating {
             for i in [0, 1] {
+                // check if the given offset's axis could have possibly come from this move's offset
+                // by not being a multiple of this move's offset or being in the wrong direction
                 if !(self.offset()[i] == 0 || offset[i] % self.offset()[i] == 0)
                     || offset[i].signum() != self.offset()[i].signum()
                 {
@@ -92,6 +94,8 @@ impl PieceMove {
                 }
             }
 
+            // if this move is vertical or horizontal, the above is enough, otherwise check that both
+            // axis are the same multiple of this move's offset
             if self.offset()[0] == 0 || self.offset()[1] == 0 {
                 true
             } else {
