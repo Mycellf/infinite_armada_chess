@@ -42,27 +42,28 @@ impl CommandInput {
     }
 
     pub fn draw(&self) {
-        const FONT_UI_SIZE: f32 = 0.5;
-        const FONT_PIXEL_SIZE: u16 = 8;
-        const FONT_SCALE: f32 = FONT_UI_SIZE / FONT_PIXEL_SIZE as f32;
-
-        const BOX_HEIGHT: f32 = FONT_UI_SIZE;
-        const CURSOR_HEIGHT: f32 = FONT_UI_SIZE * 3.0 / 4.0;
-
-        const HORIZONTAL_OFFSET: f32 = FONT_UI_SIZE / 4.0;
-        const VERTICAL_OFFSET: f32 = FONT_UI_SIZE / 4.0;
-
         if self.command.is_empty() {
             return;
         }
 
+        let font_ui_size: f32 = 0.5;
+
+        let (font_size, font_scale, font_scale_aspect) = text::camera_font_scale(font_ui_size);
+
+        let box_height: f32 = font_ui_size;
+        let cursor_height: f32 = font_ui_size * 3.0 / 4.0;
+
+        let horizontal_offset: f32 = font_ui_size / 4.0;
+        let vertical_offset: f32 = font_ui_size / 4.0;
+
         let TextDimensions { width, .. } = text::draw_text_ex(
             &self.command,
-            HORIZONTAL_OFFSET,
-            -VERTICAL_OFFSET,
+            horizontal_offset,
+            -vertical_offset,
             TextParams {
-                font_size: FONT_PIXEL_SIZE,
-                font_scale: FONT_SCALE,
+                font_size,
+                font_scale,
+                font_scale_aspect,
                 color: colors::BLANK,
                 ..Default::default()
             },
@@ -70,29 +71,30 @@ impl CommandInput {
 
         shapes::draw_rectangle(
             0.0,
-            -BOX_HEIGHT,
-            HORIZONTAL_OFFSET * 2.0 + width,
-            BOX_HEIGHT,
+            -box_height,
+            horizontal_offset * 2.0 + width,
+            box_height,
             colors::BLACK,
         );
 
         if self.command.len() < Self::MAX_COMMAND_LENGTH {
             shapes::draw_rectangle(
-                HORIZONTAL_OFFSET + width,
-                -(BOX_HEIGHT + CURSOR_HEIGHT) / 2.0,
-                FONT_UI_SIZE / 16.0,
-                CURSOR_HEIGHT,
+                horizontal_offset + width,
+                -(box_height + cursor_height) / 2.0,
+                font_ui_size / 16.0,
+                cursor_height,
                 colors::WHITE,
             );
         }
 
         text::draw_text_ex(
             &self.command,
-            HORIZONTAL_OFFSET,
-            -VERTICAL_OFFSET,
+            horizontal_offset,
+            -vertical_offset,
             TextParams {
-                font_size: FONT_PIXEL_SIZE,
-                font_scale: FONT_SCALE,
+                font_size,
+                font_scale,
+                font_scale_aspect,
                 color: colors::WHITE,
                 ..Default::default()
             },
