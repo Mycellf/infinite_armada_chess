@@ -39,6 +39,8 @@ impl CommandInput {
         } else if input::is_key_pressed(KeyCode::Escape) {
             self.command.clear();
             None
+        } else if input::is_key_pressed(KeyCode::Home) {
+            Some(MoveCommand::Home)
         } else {
             None
         }
