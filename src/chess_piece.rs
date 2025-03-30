@@ -1,5 +1,5 @@
-pub mod chess_piece_moves;
-pub mod chess_piece_textures;
+pub mod moves;
+pub mod textures;
 
 use crate::chess_board;
 
