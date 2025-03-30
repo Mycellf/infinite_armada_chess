@@ -50,6 +50,7 @@ async fn main() {
             world_camera.target.y = SCREEN_START_POSITION;
         }
 
+        // move selection
         'outer: {
             if !input::is_mouse_button_pressed(MouseButton::Left) {
                 break 'outer;
