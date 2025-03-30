@@ -65,7 +65,7 @@ async fn main() {
             };
 
             let Some(start_tile) = selected_tile else {
-                if let Some(Some(selected_piece)) = board.get_piece(end_tile) {
+                if let Some(selected_piece) = board.get_piece(end_tile).unwrap() {
                     if selected_piece.team == board.turn {
                         selected_tile = Some(end_tile);
                     }
