@@ -17,6 +17,7 @@ async fn main() {
 
     const SCREEN_START_POSITION: f32 =
         chess_board::NUM_TRADITIONAL_RANKS as f32 / 2.0 * ChessBoard::RANK_HEIGHT;
+    let mut rank_offset = 0;
 
     let mut screen_height = SCREEN_HEIGHT_INCREMENT;
     let mut zoom_level = 1.0;
@@ -78,6 +79,8 @@ async fn main() {
                 break 'outer;
             };
 
+            let end_tile = [end_tile[0] + rank_offset, end_tile[1]];
+
             let Some(start_tile) = selected_tile else {
                 let mut end_tile = end_tile;
 
@@ -114,11 +117,13 @@ async fn main() {
                     }
                 }
                 MoveCommand::MoveView { rank } => {
-                    world_camera.target.y = (rank as f32 + 0.5) * ChessBoard::RANK_HEIGHT;
+                    world_camera.target.y = 0.5 * ChessBoard::RANK_HEIGHT;
+                    rank_offset = rank;
                     command_input.command.clear();
                 }
                 MoveCommand::Home => {
                     world_camera.target.y = SCREEN_START_POSITION;
+                    rank_offset = 0;
                     command_input.command.clear();
                 }
             }
@@ -143,11 +148,16 @@ async fn main() {
             }
         }
 
+        let nudge = world_camera.target.y.round() as isize;
+        world_camera.target.y -= nudge as f32;
+        rank_offset = rank_offset.saturating_add(nudge);
+
         camera::set_camera(&world_camera);
 
         board.draw_ranks(
             world_camera.target.y - screen_height / 2.0 + 0.5,
             world_camera.target.y + screen_height / 2.0 - 0.5,
+            rank_offset,
             selected_tile,
         );
 

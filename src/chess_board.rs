@@ -234,7 +234,13 @@ impl ChessBoard {
     pub const DARK_TILE_COLOR: Color = Color::from_hex(0xb58863);
     pub const LIGHT_TILE_COLOR: Color = Color::from_hex(0xf0d9b5);
 
-    pub fn draw_ranks(&self, start: f32, end: f32, highlighted_tile: Option<[isize; 2]>) {
+    pub fn draw_ranks(
+        &self,
+        start: f32,
+        end: f32,
+        offset: isize,
+        highlighted_tile: Option<[isize; 2]>,
+    ) {
         let lowest = start.floor() as isize;
         let highest = (end - Self::RANK_HEIGHT).ceil() as isize;
 
@@ -246,7 +252,7 @@ impl ChessBoard {
 
         for rank in start_rank..end_rank + 1 {
             let highlights_mask = if let Some(highlighted_tile) = highlighted_tile {
-                if rank == highlighted_tile[0] {
+                if rank + offset == highlighted_tile[0] {
                     1 << highlighted_tile[1]
                 } else {
                     0
@@ -255,7 +261,7 @@ impl ChessBoard {
                 0
             };
 
-            self.draw_rank(rank, highlights_mask);
+            self.draw_rank(rank, offset, highlights_mask);
         }
 
         #[rustfmt::skip]
@@ -301,8 +307,11 @@ impl ChessBoard {
         }
     }
 
-    pub fn draw_rank(&self, rank: isize, mut hightlights_mask: u8) {
+    pub fn draw_rank(&self, rank: isize, offset: isize, mut hightlights_mask: u8) {
         let height = self.height_of_rank(rank);
+
+        let rank = rank + offset;
+
         let mut tile_parity = rank % 2 == 0;
 
         let rank_contents = self.get_rank(rank);
