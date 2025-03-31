@@ -274,7 +274,7 @@ impl ChessBoard {
 
             let file_string = (('a' as u8 + file as u8) as char).to_string();
 
-            let foreground = colors::WHITE;
+            let foreground = colors::GRAY;
             let background = colors::BLANK;
 
             #[rustfmt::skip]
