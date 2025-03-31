@@ -88,6 +88,9 @@ async fn main() {
             let Some(start_tile) = selected_tile else {
                 let mut end_tile = end_tile;
 
+                let seek_down = input::is_key_down(KeyCode::LeftShift)
+                    || input::is_key_down(KeyCode::RightShift);
+
                 #[rustfmt::skip]
                 let offset = if board.turn == PieceTeam::Black { 1 } else { -1 };
 
@@ -98,8 +101,10 @@ async fn main() {
                         }
 
                         break 'outer;
-                    } else {
+                    } else if seek_down {
                         end_tile[0] += offset;
+                    } else {
+                        break 'outer;
                     }
                 }
             };
