@@ -260,21 +260,27 @@ impl ChessBoard {
             self.draw_rank(rank, highlights_mask);
         }
 
+        shapes::draw_rectangle(
+            -2.0,
+            start - 0.5,
+            Self::RANK_WIDTH + 4.0,
+            0.5,
+            colors::BLACK,
+        );
+        shapes::draw_rectangle(-2.0, end, Self::RANK_WIDTH + 4.0, 0.5, colors::BLACK);
+
         for file in 0..NUM_FILES {
             let tile_x = self.x_position_of_file(file as isize) + Self::TILE_SIZE / 2.0;
 
             let file_string = (('a' as u8 + file as u8) as char).to_string();
 
             let foreground = colors::WHITE;
-            let background = Color {
-                a: 0.75,
-                ..colors::BLACK
-            };
+            let background = colors::BLANK;
 
             #[rustfmt::skip]
             {
-                draw_boxed_text(&file_string, tile_x, start, 0.5, [0.5, 0.0], foreground, background);
-                draw_boxed_text(&file_string, tile_x, end, 0.5, [0.5, 1.0], foreground, background);
+                draw_boxed_text(&file_string, tile_x, start, 0.5, [0.5, 1.0], foreground, background);
+                draw_boxed_text(&file_string, tile_x, end, 0.5, [0.5, 0.0], foreground, background);
             };
         }
     }

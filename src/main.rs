@@ -146,8 +146,8 @@ async fn main() {
         camera::set_camera(&world_camera);
 
         board.draw_ranks(
-            world_camera.target.y - screen_height / 2.0,
-            world_camera.target.y + screen_height / 2.0,
+            world_camera.target.y - screen_height / 2.0 + 0.5,
+            world_camera.target.y + screen_height / 2.0 - 0.5,
             selected_tile,
         );
 
