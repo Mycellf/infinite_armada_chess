@@ -310,7 +310,9 @@ impl ChessBoard {
     pub fn draw_rank(&self, rank: isize, offset: isize, mut hightlights_mask: u8) {
         let height = self.height_of_rank(rank);
 
-        let rank = rank + offset;
+        let Some(rank) = rank.checked_add(offset) else {
+            return;
+        };
 
         let mut tile_parity = rank % 2 == 0;
 
@@ -347,7 +349,7 @@ impl ChessBoard {
             hightlights_mask >>= 1;
         }
 
-        let rank_string = (rank + 1).to_string();
+        let rank_string = (rank as i128 + 1).to_string();
         let size = 0.4;
 
         let center_y = height + Self::RANK_HEIGHT / 2.0;
