@@ -343,7 +343,7 @@ impl ChessBoard {
         let center_y = height + Self::RANK_HEIGHT / 2.0;
 
         let foreground_color = colors::GRAY;
-        let background_color = colors::BLACK;
+        let background_color = colors::BLANK;
 
         #[rustfmt::skip]
         {
@@ -397,7 +397,9 @@ fn draw_boxed_text(
     let x = x - box_width * align[0];
     let y = y - box_height * align[1];
 
-    shapes::draw_rectangle(x, y, box_width, box_height, background_color);
+    if background_color != colors::BLANK {
+        shapes::draw_rectangle(x, y, box_width, box_height, background_color);
+    }
 
     text::draw_text_ex(
         &text,
