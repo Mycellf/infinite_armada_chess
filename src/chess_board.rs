@@ -240,13 +240,13 @@ impl ChessBoard {
         let lowest = start.floor() as isize;
         let highest = (end - Self::RANK_HEIGHT).ceil() as isize;
 
-        let (start, end) = if self.turn == PieceTeam::Black {
+        let (start_rank, end_rank) = if self.turn == PieceTeam::Black {
             (self.invert_rank(highest), self.invert_rank(lowest))
         } else {
             (lowest, highest)
         };
 
-        for rank in start..end + 1 {
+        for rank in start_rank..end_rank + 1 {
             let highlights_mask = if let Some(highlighted_tile) = highlighted_tile {
                 if rank == highlighted_tile[0] {
                     1 << highlighted_tile[1]
@@ -258,6 +258,24 @@ impl ChessBoard {
             };
 
             self.draw_rank(rank, highlights_mask);
+        }
+
+        for file in 0..NUM_FILES {
+            let tile_x = self.x_position_of_file(file as isize) + Self::TILE_SIZE / 2.0;
+
+            let file_string = (('a' as u8 + file as u8) as char).to_string();
+
+            let foreground = colors::WHITE;
+            let background = Color {
+                a: 0.75,
+                ..colors::BLACK
+            };
+
+            #[rustfmt::skip]
+            {
+                draw_boxed_text(&file_string, tile_x, start, 0.5, [0.5, 0.0], foreground, background);
+                draw_boxed_text(&file_string, tile_x, end, 0.5, [0.5, 1.0], foreground, background);
+            };
         }
     }
 
@@ -289,16 +307,7 @@ impl ChessBoard {
         let rank_contents = self.get_rank(rank);
 
         for file in 0..NUM_FILES {
-            let tile_x = {
-                let file = if PieceTeam::Black == self.turn {
-                    // if file is in the range 0..NUM_FILES, it will remain in that range when flipped
-                    self.invert_file(file as isize) as usize
-                } else {
-                    file
-                };
-
-                file as f32 * Self::TILE_SIZE
-            };
+            let tile_x = self.x_position_of_file(file as isize);
 
             let tile_color = if hightlights_mask & 1 == 1 {
                 colors::WHITE
@@ -328,15 +337,19 @@ impl ChessBoard {
             hightlights_mask >>= 1;
         }
 
-        let color = colors::GRAY;
         let rank_string = (rank + 1).to_string();
         let size = 0.4;
 
         let center_y = height + Self::RANK_HEIGHT / 2.0;
 
-        draw_boxed_text(&rank_string, 0.0, center_y, size, [1.0, 0.5], color);
+        let foreground_color = colors::GRAY;
+        let background_color = colors::BLACK;
+
         #[rustfmt::skip]
-        draw_boxed_text(&rank_string, Self::RANK_WIDTH, center_y, size, [0.0, 0.5], color);
+        {
+            draw_boxed_text(&rank_string, 0.0, center_y, size, [1.0, 0.5], foreground_color, background_color);
+            draw_boxed_text(&rank_string, Self::RANK_WIDTH, center_y, size, [0.0, 0.5], foreground_color, background_color);
+        };
     }
 
     pub fn height_of_rank(&self, rank: isize) -> f32 {
@@ -348,10 +361,29 @@ impl ChessBoard {
 
         rank as f32 * Self::RANK_HEIGHT
     }
+
+    pub fn x_position_of_file(&self, file: isize) -> f32 {
+        let file = if PieceTeam::Black == self.turn {
+            // if file is in the range 0..NUM_FILES, it will remain in that range when flipped
+            self.invert_file(file)
+        } else {
+            file
+        };
+
+        file as f32 * Self::TILE_SIZE
+    }
 }
 
 // Align of 0.0 means left align, align of 1.0 means right align
-fn draw_boxed_text(text: &str, x: f32, y: f32, size: f32, align: [f32; 2], color: Color) {
+fn draw_boxed_text(
+    text: &str,
+    x: f32,
+    y: f32,
+    size: f32,
+    align: [f32; 2],
+    foreground_color: Color,
+    background_color: Color,
+) {
     let (font_size, font_scale, _) = text::camera_font_scale(size);
 
     let horizontal_offset: f32 = size / 4.0;
@@ -365,7 +397,7 @@ fn draw_boxed_text(text: &str, x: f32, y: f32, size: f32, align: [f32; 2], color
     let x = x - box_width * align[0];
     let y = y - box_height * align[1];
 
-    shapes::draw_rectangle(x, y, box_width, box_height, colors::BLACK);
+    shapes::draw_rectangle(x, y, box_width, box_height, background_color);
 
     text::draw_text_ex(
         &text,
@@ -375,7 +407,7 @@ fn draw_boxed_text(text: &str, x: f32, y: f32, size: f32, align: [f32; 2], color
             font_size,
             font_scale: -font_scale,
             font_scale_aspect: -1.0,
-            color,
+            color: foreground_color,
             ..Default::default()
         },
     );
