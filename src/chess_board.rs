@@ -232,7 +232,7 @@ impl ChessBoard {
     pub const RANK_HEIGHT: f32 = Self::TILE_SIZE;
     pub const RANK_WIDTH: f32 = Self::TILE_SIZE * NUM_FILES as f32;
 
-    // colors from the palette used by lichess.org
+    // CREDIT: colors from the palette used by lichess.org
     pub const DARK_TILE_COLOR: Color = Color::from_hex(0xb58863);
     pub const LIGHT_TILE_COLOR: Color = Color::from_hex(0xf0d9b5);
 
