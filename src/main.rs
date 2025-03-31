@@ -118,7 +118,11 @@ async fn main() {
                 }
                 MoveCommand::MoveView { rank } => {
                     world_camera.target.y = 0.5 * ChessBoard::RANK_HEIGHT;
-                    rank_offset = rank;
+                    if board.turn == PieceTeam::Black {
+                        rank_offset = rank - (chess_board::NUM_TRADITIONAL_RANKS - 1) as isize;
+                    } else {
+                        rank_offset = rank;
+                    }
                     command_input.command.clear();
                 }
                 MoveCommand::Home => {
@@ -150,7 +154,11 @@ async fn main() {
 
         let nudge = world_camera.target.y.round() as isize;
         world_camera.target.y -= nudge as f32;
-        rank_offset = rank_offset.saturating_add(nudge);
+        if board.turn == PieceTeam::Black {
+            rank_offset = rank_offset.saturating_sub(nudge);
+        } else {
+            rank_offset = rank_offset.saturating_add(nudge);
+        }
 
         camera::set_camera(&world_camera);
 
