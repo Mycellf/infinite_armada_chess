@@ -156,13 +156,23 @@ async fn main() {
             }
         }
 
-        let nudge = world_camera.target.y.round() as isize;
-        world_camera.target.y -= nudge as f32;
-        if board.turn == PieceTeam::Black {
-            rank_offset = rank_offset.saturating_sub(nudge);
+        let camera_nudge = world_camera.target.y.round() as isize;
+        world_camera.target.y -= camera_nudge as f32;
+
+        let offset_nudge = if board.turn == PieceTeam::Black {
+            -camera_nudge
         } else {
-            rank_offset = rank_offset.saturating_add(nudge);
-        }
+            camera_nudge
+        };
+        rank_offset = rank_offset.checked_add(offset_nudge).unwrap_or_else(|| {
+            if offset_nudge > 0 {
+                world_camera.target.y = 0.5;
+                isize::MAX
+            } else {
+                world_camera.target.y = -0.5;
+                isize::MIN
+            }
+        });
 
         camera::set_camera(&world_camera);
 
