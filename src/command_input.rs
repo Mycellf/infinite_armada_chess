@@ -13,7 +13,7 @@ pub struct CommandInput {
 }
 
 impl CommandInput {
-    pub const MAX_COMMAND_LENGTH: usize = 20;
+    pub const MAX_COMMAND_LENGTH: usize = 50;
 
     pub fn update(&mut self) -> Option<MoveCommand> {
         while let Some(character) = input::get_char_pressed() {
@@ -65,8 +65,10 @@ impl CommandInput {
 
         if last_character == ' ' {
             is_valid_file(character)
-        } else if last_character == ':' || is_valid_file(last_character) {
+        } else if is_valid_file(last_character) {
             character.is_ascii_digit() || character == '-'
+        } else if last_character == ':' {
+            character.is_ascii_digit() || "-xn".contains(character)
         } else if last_character.is_ascii_digit() || last_character == '-' {
             character.is_ascii_digit() || character == ' '
         } else {
@@ -167,6 +169,10 @@ impl MoveCommand {
 
         if destination.is_empty() {
             Some(Self::Home)
+        } else if destination == "x" {
+            Some(Self::MoveView { rank: isize::MAX })
+        } else if destination == "n" {
+            Some(Self::MoveView { rank: isize::MIN })
         } else {
             Some(Self::MoveView {
                 rank: destination.parse::<isize>().ok()? - 1,

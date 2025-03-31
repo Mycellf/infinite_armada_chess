@@ -252,7 +252,7 @@ impl ChessBoard {
 
         for rank in start_rank..end_rank + 1 {
             let highlights_mask = if let Some(highlighted_tile) = highlighted_tile {
-                if rank + offset == highlighted_tile[0] {
+                if rank.checked_add(offset) == Some(highlighted_tile[0]) {
                     1 << highlighted_tile[1]
                 } else {
                     0

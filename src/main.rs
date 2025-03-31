@@ -79,7 +79,11 @@ async fn main() {
                 break 'outer;
             };
 
-            let end_tile = [end_tile[0] + rank_offset, end_tile[1]];
+            let Some(end_rank) = end_tile[0].checked_add(rank_offset) else {
+                selected_tile = None;
+                break 'outer;
+            };
+            let end_tile = [end_rank, end_tile[1]];
 
             let Some(start_tile) = selected_tile else {
                 let mut end_tile = end_tile;
