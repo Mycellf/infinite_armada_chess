@@ -258,14 +258,11 @@ impl ChessBoard {
             self.draw_rank(rank, highlights_mask);
         }
 
-        shapes::draw_rectangle(
-            -2.0,
-            start - 0.5,
-            Self::RANK_WIDTH + 4.0,
-            0.5,
-            colors::BLACK,
-        );
-        shapes::draw_rectangle(-2.0, end, Self::RANK_WIDTH + 4.0, 0.5, colors::BLACK);
+        #[rustfmt::skip]
+        {
+            shapes::draw_rectangle(-2.0, start - 1.0, Self::RANK_WIDTH + 4.0, 1.0, colors::BLACK);
+            shapes::draw_rectangle(-2.0, end, Self::RANK_WIDTH + 4.0, 1.0, colors::BLACK);
+        };
 
         for file in 0..NUM_FILES {
             let tile_x = self.x_position_of_file(file as isize) + Self::TILE_SIZE / 2.0;
