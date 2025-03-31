@@ -13,12 +13,17 @@ use macroquad::{
 
 #[macroquad::main("Infinite Armada Chess")]
 async fn main() {
-    const SCREEN_HEIGHT: f32 = 9.5;
+    const SCREEN_HEIGHT_PADDING: f32 = 1.5;
+    const SCREEN_HEIGHT_INCREMENT: f32 = 8.0;
+
     const SCREEN_START_POSITION: f32 =
         chess_board::NUM_TRADITIONAL_RANKS as f32 / 2.0 * ChessBoard::RANK_HEIGHT;
 
+    let mut screen_height = SCREEN_HEIGHT_PADDING + SCREEN_HEIGHT_INCREMENT;
+    let mut zoom_level = 1.0;
+
     let mut world_camera = Camera2D {
-        zoom: [1.0, -2.0 / SCREEN_HEIGHT].into(),
+        zoom: [1.0, -2.0 / screen_height].into(),
         target: [ChessBoard::RANK_WIDTH / 2.0, SCREEN_START_POSITION].into(),
         ..Default::default()
     };
@@ -55,8 +60,10 @@ async fn main() {
 
         let scroll_speed = 0.5;
 
-        world_camera.target.y += input::mouse_wheel().1 * scroll_speed
+        let input_motion = input::mouse_wheel().1 * scroll_speed
             + input as f32 * pan_speed * time::get_frame_time();
+
+        world_camera.target.y += input_motion * zoom_level;
 
         // move selection
         'outer: {
@@ -118,11 +125,30 @@ async fn main() {
             }
         }
 
+        'outer: {
+            if command_input.command.is_empty() {
+                zoom_level = if input::is_key_pressed(KeyCode::Key1) {
+                    1.0
+                } else if input::is_key_pressed(KeyCode::Key2) {
+                    2.0
+                } else if input::is_key_pressed(KeyCode::Key3) {
+                    4.0
+                } else {
+                    break 'outer;
+                };
+
+                screen_height = SCREEN_HEIGHT_PADDING + SCREEN_HEIGHT_INCREMENT * zoom_level;
+
+                world_camera.zoom.y = -2.0 / screen_height;
+                update_camera_aspect_ratio(&mut world_camera);
+            }
+        }
+
         camera::set_camera(&world_camera);
 
         board.draw_ranks(
-            world_camera.target.y - SCREEN_HEIGHT / 2.0,
-            world_camera.target.y + SCREEN_HEIGHT / 2.0,
+            world_camera.target.y - screen_height / 2.0,
+            world_camera.target.y + screen_height / 2.0,
             selected_tile,
         );
 
