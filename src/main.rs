@@ -53,9 +53,9 @@ async fn main() {
         let input = input::is_key_down(KeyCode::Up) as i8 - input::is_key_down(KeyCode::Down) as i8;
         let pan_speed =
             if input::is_key_down(KeyCode::LeftShift) || input::is_key_down(KeyCode::RightShift) {
-                16.0
+                32.0
             } else {
-                4.0
+                8.0
             };
 
         let scroll_speed = 0.5;
