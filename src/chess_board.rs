@@ -60,8 +60,6 @@ impl ChessBoard {
             return Err(());
         }
 
-        let moved_tile = Some(starting_piece.moved());
-
         if !self.check_move(from, to) {
             return Err(());
         }
@@ -70,7 +68,7 @@ impl ChessBoard {
             return Err(());
         };
 
-        *ending_tile = moved_tile;
+        *ending_tile = Some(starting_piece.moved());
 
         let Some(starting_tile) = self.get_piece_expanding(from) else {
             return Err(());
