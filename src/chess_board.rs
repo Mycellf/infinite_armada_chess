@@ -71,7 +71,7 @@ impl ChessBoard {
         *ending_tile = Some(starting_piece.moved());
 
         let Some(starting_tile) = self.get_piece_expanding(from) else {
-            return Err(());
+            unreachable!();
         };
 
         *starting_tile = None;
