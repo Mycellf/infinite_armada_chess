@@ -1,3 +1,5 @@
+use std::ptr;
+
 use super::{ChessPiece, PieceKind, PieceMove, PieceTeam};
 
 impl ChessPiece {
@@ -14,6 +16,12 @@ impl ChessPiece {
             PieceKind::Queen => &QUEEN_MOVES,
             PieceKind::King => &KING_MOVES,
         }
+    }
+
+    /// WARN: This does not compare any underlying data, only whether or not it is a reference to
+    /// the same static as self.moves() would return.
+    pub fn is_moveset_from_same_reference(&self, moves: &[PieceMove]) -> bool {
+        ptr::eq(self.moves(), moves)
     }
 }
 
