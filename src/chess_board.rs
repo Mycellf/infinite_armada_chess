@@ -22,6 +22,7 @@ pub struct ChessBoard {
     pub ranks: VecDeque<Rank>,
     pub ranks_behind_white: usize,
     pub turn: PieceTeam,
+    pub king_positions: [[isize; 2]; 2],
 }
 
 impl ChessBoard {
@@ -42,6 +43,7 @@ impl ChessBoard {
             ranks,
             ranks_behind_white: 0,
             turn: PieceTeam::White,
+            king_positions: [[7, 4], [0, 4]],
         }
     }
 
@@ -69,6 +71,9 @@ impl ChessBoard {
         };
 
         *ending_tile = Some(starting_piece.moved());
+        if let PieceKind::King = starting_piece.kind {
+            *self.get_king_position_mut() = to;
+        }
 
         let Some(starting_tile) = self.get_piece_expanding(from) else {
             unreachable!();
@@ -190,6 +195,20 @@ impl ChessBoard {
     pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
         self.get_rank_mut(rank)?
             .get_mut(usize::try_from(file).ok()?)
+    }
+
+    pub fn get_king_position(&self) -> [isize; 2] {
+        match self.turn {
+            PieceTeam::Black => self.king_positions[0],
+            PieceTeam::White => self.king_positions[1],
+        }
+    }
+
+    pub fn get_king_position_mut(&mut self) -> &mut [isize; 2] {
+        match self.turn {
+            PieceTeam::Black => &mut self.king_positions[0],
+            PieceTeam::White => &mut self.king_positions[1],
+        }
     }
 
     pub fn get_piece_expanding(
