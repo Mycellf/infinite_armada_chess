@@ -17,6 +17,18 @@ impl ChessPiece {
     }
 }
 
+pub static ALL_MOVES: [&[PieceMove]; 9] = [
+    &PAWN_MOVES_BLACK,
+    &PAWN_MOVES_BLACK_NEW,
+    &PAWN_MOVES_WHITE,
+    &PAWN_MOVES_WHITE_NEW,
+    &BISHOP_MOVES,
+    &KNIGHT_MOVES,
+    &ROOK_MOVES,
+    &QUEEN_MOVES,
+    &KING_MOVES,
+];
+
 #[rustfmt::skip]
 static PAWN_MOVES_BLACK: [PieceMove; 3] = [
     PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false },
