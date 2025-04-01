@@ -160,7 +160,11 @@ impl ChessBoard {
     }
 
     pub fn index_of_rank(&self, rank: isize) -> isize {
-        rank + self.ranks_behind_white as isize
+        // HACK: If rank is greater than isize::MAX - self.ranks_behind_white, this returns the
+        // index of the last rank in stead. Under normal circumstances a game will not last long
+        // enough for this to matter (32 bit isize would require a game to last at minimum 68 years
+        // at a rate of one move per second)
+        rank.saturating_add(self.ranks_behind_white as isize)
     }
 
     pub fn first_rank(&self) -> isize {
