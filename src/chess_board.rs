@@ -90,7 +90,16 @@ impl ChessBoard {
             return false;
         };
 
-        let offset = [0, 1].map(|i| to[i] - from[i]);
+        // HACK: There is an overflow if the player attempts to make a move with magnitude more
+        // than isize can fit. If such an overflow happens, the game would need to be big enough
+        // to fit at least 2^31 ranks (34 gigabytes of data, which 32 bit machines cannot index).
+        // In this case, the function gives up and returns false.
+        let [Some(rank_offset), Some(file_offset)] = [0, 1].map(|i| to[i].checked_sub(from[i]))
+        else {
+            return false;
+        };
+
+        let offset = [rank_offset, file_offset];
 
         // find the move being referenced
         let Some(&piece_move) = (starting_piece.moves().iter())
