@@ -7,22 +7,16 @@ use crate::chess_board;
 pub struct ChessPiece {
     pub kind: PieceKind,
     pub team: PieceTeam,
-    pub num_moves: u16,
 }
 
 impl ChessPiece {
     pub const fn new(kind: PieceKind, team: PieceTeam) -> Self {
-        Self {
-            kind,
-            team,
-            num_moves: 0,
-        }
+        Self { kind, team }
     }
 
     pub fn moved(self) -> Self {
         Self {
             kind: self.kind.moved(),
-            num_moves: self.num_moves.saturating_add(1),
             ..self
         }
     }
