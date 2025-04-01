@@ -285,9 +285,18 @@ impl ChessBoard {
 
             let file_x = self.x_position_of_file(file);
 
-            if rank < start_rank.saturating_add(offset) {
+            let white_side = rank < start_rank.saturating_add(offset);
+            let black_side = rank > end_rank.saturating_add(offset);
+
+            let (above, below) = if self.turn == PieceTeam::Black {
+                (white_side, black_side)
+            } else {
+                (black_side, white_side)
+            };
+
+            if below {
                 shapes::draw_rectangle(file_x, start - 0.5, Self::TILE_SIZE, 0.5, colors::WHITE);
-            } else if rank > end_rank.saturating_add(offset) {
+            } else if above {
                 shapes::draw_rectangle(file_x, end, Self::TILE_SIZE, 0.5, colors::WHITE);
             }
         }
