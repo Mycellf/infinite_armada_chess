@@ -75,9 +75,9 @@ impl ChessBoard {
             *self.get_king_position_mut() = to;
         }
 
-        let Some(starting_tile) = self.get_piece_expanding(from) else {
-            unreachable!();
-        };
+        let starting_tile = self
+            .get_piece_expanding(from)
+            .expect("Starting tile is already valid");
 
         *starting_tile = None;
 
