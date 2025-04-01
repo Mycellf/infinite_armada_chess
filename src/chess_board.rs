@@ -10,7 +10,10 @@ use macroquad::{
     texture::{self, DrawTextureParams},
 };
 
-use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
+use crate::{
+    chess_piece::{ChessPiece, PieceKind, PieceTeam},
+    textures,
+};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
@@ -271,6 +274,45 @@ impl ChessBoard {
             };
 
             self.draw_rank(rank, offset, highlighted_file);
+        }
+
+        if let Some(highlighted_tile) = highlighted_tile {
+            let rank = highlighted_tile[0];
+            let file = highlighted_tile[1];
+
+            const SIZE: f32 = 0.5;
+            const CENTER_DISTANCE: f32 = 3.0 / 8.0;
+
+            const X_OFFSET: f32 = (ChessBoard::TILE_SIZE - SIZE) / 2.0;
+            const NEAR_OFFSET: f32 = CENTER_DISTANCE - SIZE / 2.0;
+            const FAR_OFFSET: f32 = CENTER_DISTANCE + SIZE / 2.0;
+
+            let file_x = self.x_position_of_file(file);
+
+            if rank < start_rank.saturating_add(offset) {
+                texture::draw_texture_ex(
+                    &textures::UI_ARROW,
+                    file_x + X_OFFSET,
+                    start + NEAR_OFFSET,
+                    colors::WHITE,
+                    DrawTextureParams {
+                        dest_size: Some([SIZE; 2].into()),
+                        flip_y: true,
+                        ..Default::default()
+                    },
+                );
+            } else if rank > end_rank.saturating_add(offset) {
+                texture::draw_texture_ex(
+                    &textures::UI_ARROW,
+                    file_x + X_OFFSET,
+                    end - FAR_OFFSET,
+                    colors::WHITE,
+                    DrawTextureParams {
+                        dest_size: Some([SIZE; 2].into()),
+                        ..Default::default()
+                    },
+                );
+            }
         }
 
         #[rustfmt::skip]

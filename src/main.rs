@@ -1,6 +1,7 @@
 pub mod chess_board;
 pub mod chess_piece;
 pub mod command_input;
+pub mod textures;
 
 use chess_board::ChessBoard;
 use chess_piece::PieceTeam;

@@ -1,5 +1,4 @@
 pub mod moves;
-pub mod textures;
 
 use crate::chess_board;
 
