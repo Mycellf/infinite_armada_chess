@@ -10,10 +10,7 @@ use macroquad::{
     texture::{self, DrawTextureParams},
 };
 
-use crate::{
-    chess_piece::{ChessPiece, PieceKind, PieceTeam},
-    textures,
-};
+use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
@@ -276,50 +273,24 @@ impl ChessBoard {
             self.draw_rank(rank, offset, highlighted_file);
         }
 
-        if let Some(highlighted_tile) = highlighted_tile {
-            let rank = highlighted_tile[0];
-            let file = highlighted_tile[1];
-
-            const SIZE: f32 = 0.5;
-            const CENTER_DISTANCE: f32 = 3.0 / 8.0;
-
-            const X_OFFSET: f32 = (ChessBoard::TILE_SIZE - SIZE) / 2.0;
-            const NEAR_OFFSET: f32 = CENTER_DISTANCE - SIZE / 2.0;
-            const FAR_OFFSET: f32 = CENTER_DISTANCE + SIZE / 2.0;
-
-            let file_x = self.x_position_of_file(file);
-
-            if rank < start_rank.saturating_add(offset) {
-                texture::draw_texture_ex(
-                    &textures::UI_ARROW,
-                    file_x + X_OFFSET,
-                    start + NEAR_OFFSET,
-                    colors::WHITE,
-                    DrawTextureParams {
-                        dest_size: Some([SIZE; 2].into()),
-                        flip_y: true,
-                        ..Default::default()
-                    },
-                );
-            } else if rank > end_rank.saturating_add(offset) {
-                texture::draw_texture_ex(
-                    &textures::UI_ARROW,
-                    file_x + X_OFFSET,
-                    end - FAR_OFFSET,
-                    colors::WHITE,
-                    DrawTextureParams {
-                        dest_size: Some([SIZE; 2].into()),
-                        ..Default::default()
-                    },
-                );
-            }
-        }
-
         #[rustfmt::skip]
         {
             shapes::draw_rectangle(-5.0, start - 1.0, Self::RANK_WIDTH + 10.0, 1.0, colors::BLACK);
             shapes::draw_rectangle(-5.0, end, Self::RANK_WIDTH + 10.0, 1.0, colors::BLACK);
         };
+
+        if let Some(highlighted_tile) = highlighted_tile {
+            let rank = highlighted_tile[0];
+            let file = highlighted_tile[1];
+
+            let file_x = self.x_position_of_file(file);
+
+            if rank < start_rank.saturating_add(offset) {
+                shapes::draw_rectangle(file_x, start - 0.5, Self::TILE_SIZE, 0.5, colors::WHITE);
+            } else if rank > end_rank.saturating_add(offset) {
+                shapes::draw_rectangle(file_x, end, Self::TILE_SIZE, 0.5, colors::WHITE);
+            }
+        }
 
         for file in 0..NUM_FILES {
             let tile_x = self.x_position_of_file(file as isize) + Self::TILE_SIZE / 2.0;

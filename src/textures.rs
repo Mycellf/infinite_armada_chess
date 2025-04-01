@@ -4,9 +4,6 @@ use macroquad::texture::{FilterMode, Image, Texture2D};
 
 use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
 
-pub static UI_ARROW: LazyLock<Texture2D> =
-    LazyLock::new(|| texture_from_bytes(include_bytes!("../textures/ui/arrow.png")));
-
 impl ChessPiece {
     pub fn texture(&self) -> &Texture2D {
         match self.team {
