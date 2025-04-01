@@ -266,8 +266,8 @@ impl ChessBoard {
 
         #[rustfmt::skip]
         {
-            shapes::draw_rectangle(-2.0, start - 1.0, Self::RANK_WIDTH + 4.0, 1.0, colors::BLACK);
-            shapes::draw_rectangle(-2.0, end, Self::RANK_WIDTH + 4.0, 1.0, colors::BLACK);
+            shapes::draw_rectangle(-5.0, start - 1.0, Self::RANK_WIDTH + 10.0, 1.0, colors::BLACK);
+            shapes::draw_rectangle(-5.0, end, Self::RANK_WIDTH + 10.0, 1.0, colors::BLACK);
         };
 
         for file in 0..NUM_FILES {
