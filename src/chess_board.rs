@@ -251,17 +251,17 @@ impl ChessBoard {
         };
 
         for rank in start_rank..end_rank + 1 {
-            let highlights_mask = if let Some(highlighted_tile) = highlighted_tile {
+            let highlighted_file = if let Some(highlighted_tile) = highlighted_tile {
                 if rank.checked_add(offset) == Some(highlighted_tile[0]) {
-                    1 << highlighted_tile[1]
+                    Some(highlighted_tile[1])
                 } else {
-                    0
+                    None
                 }
             } else {
-                0
+                None
             };
 
-            self.draw_rank(rank, offset, highlights_mask);
+            self.draw_rank(rank, offset, highlighted_file);
         }
 
         #[rustfmt::skip]
@@ -307,7 +307,7 @@ impl ChessBoard {
         }
     }
 
-    pub fn draw_rank(&self, rank: isize, offset: isize, mut hightlights_mask: u8) {
+    pub fn draw_rank(&self, rank: isize, offset: isize, highlighted_file: Option<isize>) {
         let height = self.height_of_rank(rank);
 
         let Some(rank) = rank.checked_add(offset) else {
@@ -318,10 +318,10 @@ impl ChessBoard {
 
         let rank_contents = self.get_rank(rank);
 
-        for file in 0..NUM_FILES {
+        for file in 0..rank_contents.len() {
             let tile_x = self.x_position_of_file(file as isize);
 
-            let tile_color = if hightlights_mask & 1 == 1 {
+            let tile_color = if highlighted_file == Some(file as isize) {
                 colors::WHITE
             } else if tile_parity {
                 Self::DARK_TILE_COLOR
@@ -346,7 +346,6 @@ impl ChessBoard {
             }
 
             tile_parity ^= true;
-            hightlights_mask >>= 1;
         }
 
         let rank_string = (rank as i128 + 1).to_string();
