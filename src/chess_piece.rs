@@ -6,18 +6,20 @@ use crate::chess_board;
 pub struct ChessPiece {
     pub kind: PieceKind,
     pub team: PieceTeam,
+    pub new: bool,
 }
 
 impl ChessPiece {
     pub const fn new(kind: PieceKind, team: PieceTeam) -> Self {
-        Self { kind, team }
+        Self {
+            kind,
+            team,
+            new: true,
+        }
     }
 
     pub fn moved(self) -> Self {
-        Self {
-            kind: self.kind.moved(),
-            ..self
-        }
+        Self { new: false, ..self }
     }
 }
 
@@ -45,22 +47,12 @@ impl PieceTeam {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PieceKind {
-    Pawn { new: bool },
+    Pawn,
     Bishop,
     Knight,
     Rook,
     Queen,
-    King { new: bool },
-}
-
-impl PieceKind {
-    pub fn moved(self) -> Self {
-        match self {
-            Self::Pawn { .. } => Self::Pawn { new: false },
-            Self::King { .. } => Self::King { new: false },
-            _ => self,
-        }
-    }
+    King,
 }
 
 #[derive(Clone, Copy, Debug)]

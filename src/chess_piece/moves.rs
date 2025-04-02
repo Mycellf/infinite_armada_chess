@@ -6,15 +6,15 @@ impl ChessPiece {
     pub fn moves(&self) -> &[PieceMove] {
         match self.kind {
             #[rustfmt::skip]
-            PieceKind::Pawn { new } => match self.team {
-                PieceTeam::Black => if new { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
-                PieceTeam::White => if new { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
+            PieceKind::Pawn => match self.team {
+                PieceTeam::Black => if self.new { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
+                PieceTeam::White => if self.new { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
             },
             PieceKind::Bishop => &BISHOP_MOVES,
             PieceKind::Knight => &KNIGHT_MOVES,
             PieceKind::Rook => &ROOK_MOVES,
             PieceKind::Queen => &QUEEN_MOVES,
-            PieceKind::King { .. } => &KING_MOVES,
+            PieceKind::King => &KING_MOVES,
         }
     }
 

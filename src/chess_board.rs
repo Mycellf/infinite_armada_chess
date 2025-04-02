@@ -75,7 +75,7 @@ impl ChessBoard {
         };
 
         *ending_tile = Some(starting_piece.moved());
-        if let PieceKind::King { .. } = starting_piece.kind {
+        if let PieceKind::King = starting_piece.kind {
             *self.get_king_position_mut() = to;
         }
 
@@ -556,19 +556,18 @@ static QUEEN_RANK_BLACK: Rank =
 
 #[rustfmt::skip]
 static KING_RANK_BLACK: Rank = [
-    Some(ChessPiece::new(PieceKind::Rook,               PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Knight,             PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Bishop,             PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Queen,              PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::King { new: true }, PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Bishop,             PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Knight,             PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Rook,               PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Queen,  PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::King,   PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
 ];
 
-#[rustfmt::skip]
 static PAWN_RANK_BLACK: Rank =
-    [Some(ChessPiece::new(PieceKind::Pawn { new: true }, PieceTeam::Black)); NUM_FILES];
+    [Some(ChessPiece::new(PieceKind::Pawn, PieceTeam::Black)); NUM_FILES];
 
 static EMPTY_RANK: Rank = [None; NUM_FILES];
 

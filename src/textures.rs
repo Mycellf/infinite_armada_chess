@@ -8,20 +8,20 @@ impl ChessPiece {
     pub fn texture(&self) -> &Texture2D {
         match self.team {
             PieceTeam::Black => match self.kind {
-                PieceKind::Pawn { .. } => &BLACK_PAWN_TEXTURE,
+                PieceKind::Pawn => &BLACK_PAWN_TEXTURE,
                 PieceKind::Bishop => &BLACK_BISHOP_TEXTURE,
                 PieceKind::Knight => &BLACK_KNIGHT_TEXTURE,
                 PieceKind::Rook => &BLACK_ROOK_TEXTURE,
                 PieceKind::Queen => &BLACK_QUEEN_TEXTURE,
-                PieceKind::King { .. } => &BLACK_KING_TEXTURE,
+                PieceKind::King => &BLACK_KING_TEXTURE,
             },
             PieceTeam::White => match self.kind {
-                PieceKind::Pawn { .. } => &WHITE_PAWN_TEXTURE,
+                PieceKind::Pawn => &WHITE_PAWN_TEXTURE,
                 PieceKind::Bishop => &WHITE_BISHOP_TEXTURE,
                 PieceKind::Knight => &WHITE_KNIGHT_TEXTURE,
                 PieceKind::Rook => &WHITE_ROOK_TEXTURE,
                 PieceKind::Queen => &WHITE_QUEEN_TEXTURE,
-                PieceKind::King { .. } => &WHITE_KING_TEXTURE,
+                PieceKind::King => &WHITE_KING_TEXTURE,
             },
         }
     }
