@@ -218,112 +218,6 @@ impl ChessBoard {
 
         false
     }
-
-    pub fn expand_to_rank(&mut self, rank: isize) {
-        if rank < self.first_rank() {
-            for _ in rank..self.first_rank() {
-                self.ranks.push_front(QUEEN_RANK_WHITE);
-            }
-
-            self.ranks_behind_white = -rank as usize;
-        } else if rank > self.last_rank() {
-            for _ in self.last_rank()..rank {
-                self.ranks.push_back(QUEEN_RANK_BLACK);
-            }
-        }
-    }
-
-    pub fn index_of_rank(&self, rank: isize) -> isize {
-        // HACK: If rank is greater than isize::MAX - self.ranks_behind_white, this returns the
-        // index of the last rank in stead. Under normal circumstances a game will not last long
-        // enough for this to matter (32 bit isize would require a game to last at minimum 68 years
-        // at a rate of one move per second)
-        rank.saturating_add(self.ranks_behind_white as isize)
-    }
-
-    pub fn first_rank(&self) -> isize {
-        -(self.ranks_behind_white as isize)
-    }
-
-    pub fn last_rank(&self) -> isize {
-        self.ranks.len() as isize + self.first_rank() - 1
-    }
-
-    pub fn invert_rank(&self, rank: isize) -> isize {
-        NUM_TRADITIONAL_RANKS as isize - rank - 1
-    }
-
-    pub fn invert_file(&self, file: isize) -> isize {
-        NUM_FILES as isize - file - 1
-    }
-
-    pub fn get_piece(&self, [rank, file]: [isize; 2]) -> Option<Option<ChessPiece>> {
-        Some(*self.get_rank(rank).get(usize::try_from(file).ok()?)?)
-    }
-
-    pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
-        self.get_rank_mut(rank)?
-            .get_mut(usize::try_from(file).ok()?)
-    }
-
-    pub fn get_king_position(&self) -> [isize; 2] {
-        match self.turn {
-            PieceTeam::Black => self.king_positions[0],
-            PieceTeam::White => self.king_positions[1],
-        }
-    }
-
-    pub fn get_king_position_mut(&mut self) -> &mut [isize; 2] {
-        match self.turn {
-            PieceTeam::Black => &mut self.king_positions[0],
-            PieceTeam::White => &mut self.king_positions[1],
-        }
-    }
-
-    pub fn get_piece_expanding(
-        &mut self,
-        [rank, file]: [isize; 2],
-    ) -> Option<&mut Option<ChessPiece>> {
-        self.get_rank_expanding(rank)
-            .get_mut(usize::try_from(file).ok()?)
-    }
-
-    pub fn get_rank(&self, rank: isize) -> &Rank {
-        if let Ok(rank_index) = self.index_of_rank(rank).try_into() {
-            self.ranks.get(rank_index).unwrap_or(
-                // rank is too high
-                &QUEEN_RANK_BLACK,
-            )
-        } else {
-            // rank is too low
-            &QUEEN_RANK_WHITE
-        }
-    }
-
-    pub fn get_rank_mut(&mut self, rank: isize) -> Option<&mut Rank> {
-        self.ranks
-            .get_mut(self.index_of_rank(rank).try_into().ok()?)
-    }
-
-    pub fn get_rank_expanding(&mut self, rank: isize) -> &mut Rank {
-        self.expand_to_rank(rank);
-
-        self.get_rank_mut(rank).unwrap()
-    }
-}
-
-impl Index<isize> for ChessBoard {
-    type Output = Rank;
-
-    fn index(&self, index: isize) -> &Self::Output {
-        self.get_rank(index)
-    }
-}
-
-impl IndexMut<isize> for ChessBoard {
-    fn index_mut(&mut self, index: isize) -> &mut Self::Output {
-        self.get_rank_expanding(index)
-    }
 }
 
 impl ChessBoard {
@@ -547,6 +441,114 @@ fn draw_boxed_text(
             ..Default::default()
         },
     );
+}
+
+impl ChessBoard {
+    pub fn expand_to_rank(&mut self, rank: isize) {
+        if rank < self.first_rank() {
+            for _ in rank..self.first_rank() {
+                self.ranks.push_front(QUEEN_RANK_WHITE);
+            }
+
+            self.ranks_behind_white = -rank as usize;
+        } else if rank > self.last_rank() {
+            for _ in self.last_rank()..rank {
+                self.ranks.push_back(QUEEN_RANK_BLACK);
+            }
+        }
+    }
+
+    pub fn index_of_rank(&self, rank: isize) -> isize {
+        // HACK: If rank is greater than isize::MAX - self.ranks_behind_white, this returns the
+        // index of the last rank in stead. Under normal circumstances a game will not last long
+        // enough for this to matter (32 bit isize would require a game to last at minimum 68 years
+        // at a rate of one move per second)
+        rank.saturating_add(self.ranks_behind_white as isize)
+    }
+
+    pub fn first_rank(&self) -> isize {
+        -(self.ranks_behind_white as isize)
+    }
+
+    pub fn last_rank(&self) -> isize {
+        self.ranks.len() as isize + self.first_rank() - 1
+    }
+
+    pub fn invert_rank(&self, rank: isize) -> isize {
+        NUM_TRADITIONAL_RANKS as isize - rank - 1
+    }
+
+    pub fn invert_file(&self, file: isize) -> isize {
+        NUM_FILES as isize - file - 1
+    }
+
+    pub fn get_piece(&self, [rank, file]: [isize; 2]) -> Option<Option<ChessPiece>> {
+        Some(*self.get_rank(rank).get(usize::try_from(file).ok()?)?)
+    }
+
+    pub fn get_piece_mut(&mut self, [rank, file]: [isize; 2]) -> Option<&mut Option<ChessPiece>> {
+        self.get_rank_mut(rank)?
+            .get_mut(usize::try_from(file).ok()?)
+    }
+
+    pub fn get_king_position(&self) -> [isize; 2] {
+        match self.turn {
+            PieceTeam::Black => self.king_positions[0],
+            PieceTeam::White => self.king_positions[1],
+        }
+    }
+
+    pub fn get_king_position_mut(&mut self) -> &mut [isize; 2] {
+        match self.turn {
+            PieceTeam::Black => &mut self.king_positions[0],
+            PieceTeam::White => &mut self.king_positions[1],
+        }
+    }
+
+    pub fn get_piece_expanding(
+        &mut self,
+        [rank, file]: [isize; 2],
+    ) -> Option<&mut Option<ChessPiece>> {
+        self.get_rank_expanding(rank)
+            .get_mut(usize::try_from(file).ok()?)
+    }
+
+    pub fn get_rank(&self, rank: isize) -> &Rank {
+        if let Ok(rank_index) = self.index_of_rank(rank).try_into() {
+            self.ranks.get(rank_index).unwrap_or(
+                // rank is too high
+                &QUEEN_RANK_BLACK,
+            )
+        } else {
+            // rank is too low
+            &QUEEN_RANK_WHITE
+        }
+    }
+
+    pub fn get_rank_mut(&mut self, rank: isize) -> Option<&mut Rank> {
+        self.ranks
+            .get_mut(self.index_of_rank(rank).try_into().ok()?)
+    }
+
+    pub fn get_rank_expanding(&mut self, rank: isize) -> &mut Rank {
+        self.expand_to_rank(rank);
+
+        self.get_rank_mut(rank).unwrap()
+    }
+}
+
+impl Index<isize> for ChessBoard {
+    type Output = Rank;
+
+    fn index(&self, index: isize) -> &Self::Output {
+        self.get_rank(index)
+    }
+}
+
+impl IndexMut<isize> for ChessBoard {
+    fn index_mut(&mut self, index: isize) -> &mut Self::Output {
+        self.get_rank_expanding(index)
+    }
 }
 
 static QUEEN_RANK_BLACK: Rank =
