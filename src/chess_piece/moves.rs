@@ -7,8 +7,8 @@ impl ChessPiece {
         match self.kind {
             #[rustfmt::skip]
             PieceKind::Pawn => match self.team {
-                PieceTeam::Black => if self.new { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
-                PieceTeam::White => if self.new { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
+                PieceTeam::Black => if self.moves == 0 { &PAWN_MOVES_BLACK_NEW } else { &PAWN_MOVES_BLACK }
+                PieceTeam::White => if self.moves == 0 { &PAWN_MOVES_WHITE_NEW } else { &PAWN_MOVES_WHITE }
             },
             PieceKind::Bishop => &BISHOP_MOVES,
             PieceKind::Knight => &KNIGHT_MOVES,
