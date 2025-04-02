@@ -3,7 +3,7 @@ use std::ptr;
 use super::{ChessPiece, PieceKind, PieceMove, PieceTeam};
 
 impl ChessPiece {
-    pub fn moves(&self) -> &[PieceMove] {
+    pub fn moves(&self) -> &'static [PieceMove] {
         match self.kind {
             #[rustfmt::skip]
             PieceKind::Pawn => match self.team {
