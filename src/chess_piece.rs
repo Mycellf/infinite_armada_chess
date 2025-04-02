@@ -96,16 +96,3 @@ impl PieceMove {
         }
     }
 }
-
-pub enum SpecialMoveKind {
-    EnPassant,
-}
-
-impl ChessPiece {
-    pub fn special_move(&self) -> Option<SpecialMoveKind> {
-        match self.kind {
-            PieceKind::Pawn => Some(SpecialMoveKind::EnPassant),
-            _ => None,
-        }
-    }
-}
