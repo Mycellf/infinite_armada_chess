@@ -126,6 +126,10 @@ impl ChessBoard {
             return None;
         };
 
+        if piece_move.requires_opportunity && self.opportunity_location != Some(to) {
+            return None;
+        }
+
         // check that the destination is valid
         if !(destination_tile.is_some() && piece_move.can_capture
             || destination_tile.is_none() && piece_move.can_move)
