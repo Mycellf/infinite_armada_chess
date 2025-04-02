@@ -1,9 +1,9 @@
 Todo: 
 
-* Keep the player from making moves that put them in check
 * Add castling
 * Add pawn promotion
 * Add en passant
+* Detect checkmate
 
 Instructions: 
 * Use arrow keys to pan and shift to pan faster
