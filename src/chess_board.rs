@@ -23,7 +23,6 @@ pub struct ChessBoard {
     pub ranks_behind_white: usize,
     pub turn: PieceTeam,
     pub king_positions: [[isize; 2]; 2],
-    pub num_turns: u64,
 }
 
 impl ChessBoard {
@@ -45,7 +44,6 @@ impl ChessBoard {
             ranks_behind_white: 0,
             turn: PieceTeam::White,
             king_positions: [[7, 4], [0, 4]],
-            num_turns: 0,
         }
     }
 
@@ -88,10 +86,6 @@ impl ChessBoard {
         *starting_tile = None;
 
         self.turn = self.turn.opposite();
-
-        if self.turn == PieceTeam::Black {
-            self.num_turns += 1;
-        }
 
         Ok(())
     }
