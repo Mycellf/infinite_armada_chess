@@ -61,19 +61,23 @@ pub enum PieceKind {
 #[derive(Clone, Copy, Debug)]
 pub struct PieceMove {
     pub offset: [i8; 2],
+    pub motion_offset: Option<[i8; 2]>,
     pub repeating: bool,
     pub can_capture: bool,
     pub can_move: bool,
     pub provokes_opportunity: bool,
+    pub requires_opportunity: bool,
 }
 
 impl PieceMove {
     pub const DEFAULT: Self = Self {
         offset: [0; 2],
+        motion_offset: None,
         repeating: false,
         can_capture: true,
         can_move: true,
         provokes_opportunity: false,
+        requires_opportunity: false,
     };
 
     pub fn offset(self) -> [isize; 2] {

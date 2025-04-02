@@ -38,23 +38,29 @@ pub static ALL_MOVES: [&[PieceMove]; 9] = [
 ];
 
 #[rustfmt::skip]
-static PAWN_MOVES_BLACK: [PieceMove; 3] = [
-    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
+static PAWN_MOVES_BLACK: [PieceMove; 5] = [
     PieceMove { offset: [-1, 0],  can_capture: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
     PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], motion_offset: Some([-1, -1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],  motion_offset: Some([-1, 1]),  can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
-static PAWN_MOVES_BLACK_NEW: [PieceMove; 4] = [
-    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
+static PAWN_MOVES_BLACK_NEW: [PieceMove; 6] = [
     PieceMove { offset: [-1, 0],  can_capture: false, ..PieceMove::DEFAULT },
-    PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
     PieceMove { offset: [-2, 0],  can_capture: false, provokes_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], motion_offset: Some([-1, -1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],  motion_offset: Some([-1, 1]),  can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
 ];
 
-static PAWN_MOVES_WHITE: [PieceMove; 3] = invert_moves(PAWN_MOVES_BLACK);
+#[rustfmt::skip]
+static PAWN_MOVES_WHITE: [PieceMove; PAWN_MOVES_BLACK.len()] = invert_moves(PAWN_MOVES_BLACK);
 
-static PAWN_MOVES_WHITE_NEW: [PieceMove; 4] = invert_moves(PAWN_MOVES_BLACK_NEW);
+#[rustfmt::skip]
+static PAWN_MOVES_WHITE_NEW: [PieceMove; PAWN_MOVES_BLACK_NEW.len()] = invert_moves(PAWN_MOVES_BLACK_NEW);
 
 #[rustfmt::skip]
 static BISHOP_MOVES: [PieceMove; 4] = [
@@ -113,6 +119,9 @@ const fn invert_moves<const N: usize>(mut moves: [PieceMove; N]) -> [PieceMove; 
 
     while i < moves.len() {
         moves[i].offset[0] = -moves[i].offset[0];
+        if let Some([rank_offset, _]) = &mut moves[i].motion_offset {
+            *rank_offset = -*rank_offset;
+        }
 
         i += 1;
     }
