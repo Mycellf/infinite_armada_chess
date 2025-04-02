@@ -10,7 +10,7 @@ use macroquad::{
     texture::{self, DrawTextureParams},
 };
 
-use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
+use crate::chess_piece::{self, ChessPiece, PieceKind, PieceTeam};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
@@ -63,6 +63,10 @@ impl ChessBoard {
         }
 
         if !self.check_move(from, to) {
+            return Err(());
+        }
+
+        if self.king_is_in_check_with_move(from, to) {
             return Err(());
         }
 
@@ -148,6 +152,71 @@ impl ChessBoard {
         }
 
         true
+    }
+
+    pub fn king_is_in_check_with_move(&self, from: [isize; 2], to: [isize; 2]) -> bool {
+        let map_tile = |tile| {
+            if tile == to {
+                Some(from)
+            } else if tile == from {
+                None
+            } else {
+                Some(tile)
+            }
+        };
+
+        let get_piece = |tile| {
+            if let Some(tile) = map_tile(tile) {
+                self.get_piece(tile)
+            } else {
+                Some(None)
+            }
+        };
+
+        let king_position = self.get_king_position();
+
+        #[rustfmt::skip]
+        let king_position = if king_position == from { to } else { king_position };
+
+        for move_kind in chess_piece::moves::ALL_MOVES {
+            for potential_move in move_kind
+                .iter()
+                .filter(|potential_move| potential_move.can_capture)
+            {
+                let mut move_position = king_position;
+                let offset = potential_move.offset();
+
+                'outer: loop {
+                    for i in [0, 1] {
+                        if let Some(result) = move_position[i].checked_sub(offset[i]) {
+                            move_position[i] = result;
+                        } else {
+                            break 'outer;
+                        }
+                    }
+
+                    if let Some(tile) = get_piece(move_position) {
+                        if let Some(piece) = tile {
+                            if piece.team == self.turn.opposite()
+                                && piece.is_moveset_from_same_reference(move_kind)
+                            {
+                                return true;
+                            }
+
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+
+                    if !potential_move.repeating {
+                        break;
+                    }
+                }
+            }
+        }
+
+        false
     }
 
     pub fn expand_to_rank(&mut self, rank: isize) {
