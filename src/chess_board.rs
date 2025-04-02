@@ -81,7 +81,7 @@ impl ChessBoard {
 
         let starting_tile = self
             .get_piece_expanding(from)
-            .expect("Starting tile is already checked to be valid");
+            .expect("Starting tile should already checked to be valid");
 
         *starting_tile = None;
 
