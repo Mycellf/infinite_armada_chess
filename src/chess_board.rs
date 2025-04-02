@@ -10,7 +10,7 @@ use macroquad::{
     texture::{self, DrawTextureParams},
 };
 
-use crate::chess_piece::{self, ChessPiece, PieceKind, PieceTeam};
+use crate::chess_piece::{self, ChessPiece, PieceKind, PieceMove, PieceTeam};
 
 pub const NUM_FILES: usize = 8;
 pub const NUM_TRADITIONAL_RANKS: usize = 8;
@@ -23,6 +23,7 @@ pub struct ChessBoard {
     pub ranks_behind_white: usize,
     pub turn: PieceTeam,
     pub king_positions: [[isize; 2]; 2],
+    pub opportunity_location: Option<[isize; 2]>,
 }
 
 impl ChessBoard {
@@ -44,6 +45,7 @@ impl ChessBoard {
             ranks_behind_white: 0,
             turn: PieceTeam::White,
             king_positions: [[7, 4], [0, 4]],
+            opportunity_location: None,
         }
     }
 
@@ -62,9 +64,9 @@ impl ChessBoard {
             return Err(());
         }
 
-        if !self.check_move(from, to) {
+        let Some(piece_move) = self.check_move(from, to) else {
             return Err(());
-        }
+        };
 
         if self.king_is_in_check_with_move(from, to) {
             return Err(());
@@ -87,16 +89,22 @@ impl ChessBoard {
 
         self.turn = self.turn.opposite();
 
+        if piece_move.opportunity {
+            self.opportunity_location = Some(to);
+        } else {
+            self.opportunity_location = None;
+        }
+
         Ok(())
     }
 
-    pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> bool {
+    pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> Option<PieceMove> {
         let Some(Some(starting_piece)) = self.get_piece(from) else {
-            return false;
+            return None;
         };
 
         let Some(destination_tile) = self.get_piece(to) else {
-            return false;
+            return None;
         };
 
         // HACK: There is an overflow if the player attempts to make a move with magnitude more
@@ -105,7 +113,7 @@ impl ChessBoard {
         // In this case, the function gives up and returns false.
         let [Some(rank_offset), Some(file_offset)] = [0, 1].map(|i| to[i].checked_sub(from[i]))
         else {
-            return false;
+            return None;
         };
 
         let offset = [rank_offset, file_offset];
@@ -115,20 +123,20 @@ impl ChessBoard {
             .filter(|&&piece_move| piece_move.is_offset_valid(offset))
             .next()
         else {
-            return false;
+            return None;
         };
 
         // check that the destination is valid
         if !(destination_tile.is_some() && piece_move.can_capture
             || destination_tile.is_none() && piece_move.can_move)
         {
-            return false;
+            return None;
         }
 
         // if the destination tile is another piece, check that it's not an ally
         if let Some(ChessPiece { team, .. }) = destination_tile {
             if team == starting_piece.team {
-                return false;
+                return None;
             }
         }
 
@@ -146,12 +154,12 @@ impl ChessBoard {
                 }
 
                 if self.get_piece(tile_index).unwrap().is_some() {
-                    return false;
+                    return None;
                 }
             }
         }
 
-        true
+        Some(piece_move)
     }
 
     pub fn king_is_in_check_with_move(&self, from: [isize; 2], to: [isize; 2]) -> bool {
