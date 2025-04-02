@@ -50,13 +50,14 @@ pub enum PieceKind {
     Knight,
     Rook,
     Queen,
-    King,
+    King { new: bool },
 }
 
 impl PieceKind {
     pub fn moved(self) -> Self {
         match self {
-            Self::Pawn { new: _ } => Self::Pawn { new: false },
+            Self::Pawn { .. } => Self::Pawn { new: false },
+            Self::King { .. } => Self::King { new: false },
             _ => self,
         }
     }

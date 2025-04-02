@@ -14,7 +14,7 @@ impl ChessPiece {
             PieceKind::Knight => &KNIGHT_MOVES,
             PieceKind::Rook => &ROOK_MOVES,
             PieceKind::Queen => &QUEEN_MOVES,
-            PieceKind::King => &KING_MOVES,
+            PieceKind::King { .. } => &KING_MOVES,
         }
     }
 
