@@ -39,17 +39,17 @@ pub static ALL_MOVES: [&[PieceMove]; 9] = [
 
 #[rustfmt::skip]
 static PAWN_MOVES_BLACK: [PieceMove; 3] = [
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false, provokes_opportunity: false },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: false, can_move: true,  provokes_opportunity: false },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false, provokes_opportunity: false },
+    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 0],  can_capture: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
 static PAWN_MOVES_BLACK_NEW: [PieceMove; 4] = [
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true,  can_move: false, provokes_opportunity: false },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: false, can_move: true,  provokes_opportunity: false },
-    PieceMove { offset: [-2, 0],  repeating: false, can_capture: false, can_move: true,  provokes_opportunity: true },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true,  can_move: false, provokes_opportunity: false },
+    PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 0],  can_capture: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-2, 0],  can_capture: false, provokes_opportunity: true, ..PieceMove::DEFAULT },
 ];
 
 static PAWN_MOVES_WHITE: [PieceMove; 3] = invert_moves(PAWN_MOVES_BLACK);
@@ -58,54 +58,54 @@ static PAWN_MOVES_WHITE_NEW: [PieceMove; 4] = invert_moves(PAWN_MOVES_BLACK_NEW)
 
 #[rustfmt::skip]
 static BISHOP_MOVES: [PieceMove; 4] = [
-    PieceMove { offset: [1, 1],   repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, -1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, -1], repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
+    PieceMove { offset: [1, 1],   repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, -1],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -1], repeating: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
 static KNIGHT_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 2],   repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [2, 1],   repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, -2],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [2, -1],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 2],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-2, 1],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, -2], repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-2, -1], repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
+    PieceMove { offset: [1, 2],   ..PieceMove::DEFAULT },
+    PieceMove { offset: [2, 1],   ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, -2],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [2, -1],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 2],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [-2, 1],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -2], ..PieceMove::DEFAULT },
+    PieceMove { offset: [-2, -1], ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
 static ROOK_MOVES: [PieceMove; 4] = [
-    PieceMove { offset: [1, 0],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, 1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 0], repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, -1], repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
+    PieceMove { offset: [1, 0],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 0], repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], repeating: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
 static QUEEN_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 0],   repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, 1],   repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, 1],   repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 0],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, -1], repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, -1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, -1],  repeating: true, can_capture: true, can_move: true, provokes_opportunity: false },
+    PieceMove { offset: [1, 0],   repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, 1],   repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],   repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 0],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -1], repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1],  repeating: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, -1],  repeating: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
 static KING_MOVES: [PieceMove; 8] = [
-    PieceMove { offset: [1, 0],   repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, 1],   repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, 1],   repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 1],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, 0],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [-1, -1], repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [0, -1],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
-    PieceMove { offset: [1, -1],  repeating: false, can_capture: true, can_move: true, provokes_opportunity: false },
+    PieceMove { offset: [1, 0],   ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, 1],   ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],   ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 1],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, 0],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [-1, -1], ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [1, -1],  ..PieceMove::DEFAULT },
 ];
 
 const fn invert_moves<const N: usize>(mut moves: [PieceMove; N]) -> [PieceMove; N] {

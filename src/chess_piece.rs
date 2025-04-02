@@ -68,6 +68,14 @@ pub struct PieceMove {
 }
 
 impl PieceMove {
+    pub const DEFAULT: Self = Self {
+        offset: [0; 2],
+        repeating: false,
+        can_capture: true,
+        can_move: true,
+        provokes_opportunity: false,
+    };
+
     pub fn offset(self) -> [isize; 2] {
         self.offset.map(|x| x as isize)
     }
@@ -94,5 +102,11 @@ impl PieceMove {
         } else {
             self.offset() == offset
         }
+    }
+}
+
+impl Default for PieceMove {
+    fn default() -> Self {
+        Self::DEFAULT
     }
 }
