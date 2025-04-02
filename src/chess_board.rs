@@ -68,17 +68,27 @@ impl ChessBoard {
             return Err(());
         };
 
-        if self.king_is_in_check_with_move(from, to) {
+        if self.king_is_in_check_with_move(from, to, piece_move) {
             return Err(());
         }
 
-        let Some(ending_tile) = self.get_piece_expanding(to) else {
+        if let Some(_) = piece_move.additional_motion_offset() {
+            let Some(captured_tile) = self.get_piece_expanding(to) else {
+                return Err(());
+            };
+
+            *captured_tile = None;
+        }
+
+        let destination = piece_move.apply_additional_motion_offset_to(to).unwrap();
+
+        let Some(ending_tile) = self.get_piece_expanding(destination) else {
             return Err(());
         };
 
         *ending_tile = Some(starting_piece.moved());
         if let PieceKind::King = starting_piece.kind {
-            *self.get_king_position_mut() = to;
+            *self.get_king_position_mut() = destination;
         }
 
         let starting_tile = self
@@ -90,7 +100,7 @@ impl ChessBoard {
         self.turn = self.turn.opposite();
 
         if piece_move.provokes_opportunity {
-            self.opportunity_location = Some(to);
+            self.opportunity_location = Some(destination);
         } else {
             self.opportunity_location = None;
         }
@@ -144,6 +154,15 @@ impl ChessBoard {
             }
         }
 
+        if let Some(_) = piece_move.additional_motion_offset() {
+            // HACK: See above note about overflows
+            let destination = piece_move.apply_additional_motion_offset_to(to)?;
+
+            let Some(None) = self.get_piece(destination) else {
+                return None;
+            };
+        }
+
         if piece_move.repeating {
             // check that any intermediate moves are valid
             let mut tile_index = from;
@@ -166,11 +185,18 @@ impl ChessBoard {
         Some(piece_move)
     }
 
-    pub fn king_is_in_check_with_move(&self, from: [isize; 2], to: [isize; 2]) -> bool {
+    pub fn king_is_in_check_with_move(
+        &self,
+        from: [isize; 2],
+        to: [isize; 2],
+        piece_move: PieceMove,
+    ) -> bool {
+        let destination = piece_move.apply_additional_motion_offset_to(to).unwrap();
+
         let map_tile = |tile| {
-            if tile == to {
+            if tile == destination {
                 Some(from)
-            } else if tile == from {
+            } else if tile == from || tile == to {
                 None
             } else {
                 Some(tile)
@@ -188,7 +214,7 @@ impl ChessBoard {
         let king_position = self.get_king_position();
 
         #[rustfmt::skip]
-        let king_position = if king_position == from { to } else { king_position };
+        let king_position = if king_position == from { destination } else { king_position };
 
         for move_kind in chess_piece::moves::ALL_MOVES {
             for potential_move in move_kind
