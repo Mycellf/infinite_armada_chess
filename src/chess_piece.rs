@@ -64,7 +64,7 @@ pub struct PieceMove {
     pub repeating: bool,
     pub can_capture: bool,
     pub can_move: bool,
-    pub opportunity: bool,
+    pub provokes_opportunity: bool,
 }
 
 impl PieceMove {

@@ -89,7 +89,7 @@ impl ChessBoard {
 
         self.turn = self.turn.opposite();
 
-        if piece_move.opportunity {
+        if piece_move.provokes_opportunity {
             self.opportunity_location = Some(to);
         } else {
             self.opportunity_location = None;
