@@ -42,8 +42,8 @@ static PAWN_MOVES_BLACK: [PieceMove; 5] = [
     PieceMove { offset: [-1, 0],  can_capture: false, ..PieceMove::DEFAULT },
     PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
     PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
-    PieceMove { offset: [0, -1], additional_motion_offset: Some([-1, 0]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
-    PieceMove { offset: [0, 1],  additional_motion_offset: Some([-1, 0]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], forced_motion_offset: Some([-1, -1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],  forced_motion_offset: Some([-1, 1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
@@ -52,8 +52,8 @@ static PAWN_MOVES_BLACK_NEW: [PieceMove; 6] = [
     PieceMove { offset: [-2, 0],  can_capture: false, provokes_opportunity: true, ..PieceMove::DEFAULT },
     PieceMove { offset: [-1, -1], can_move: false, ..PieceMove::DEFAULT },
     PieceMove { offset: [-1, 1],  can_move: false, ..PieceMove::DEFAULT },
-    PieceMove { offset: [0, -1], additional_motion_offset: Some([-1, 0]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
-    PieceMove { offset: [0, 1],  additional_motion_offset: Some([-1, 0]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], forced_motion_offset: Some([-1, -1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1],  forced_motion_offset: Some([-1, 1]), can_move: false, requires_opportunity: true, ..PieceMove::DEFAULT },
 ];
 
 #[rustfmt::skip]
@@ -119,7 +119,7 @@ const fn invert_moves<const N: usize>(mut moves: [PieceMove; N]) -> [PieceMove; 
 
     while i < moves.len() {
         moves[i].offset[0] = -moves[i].offset[0];
-        if let Some([rank_offset, _]) = &mut moves[i].additional_motion_offset {
+        if let Some([rank_offset, _]) = &mut moves[i].forced_motion_offset {
             *rank_offset = -*rank_offset;
         }
 

@@ -61,7 +61,7 @@ pub enum PieceKind {
 #[derive(Clone, Copy, Debug)]
 pub struct PieceMove {
     pub offset: [i8; 2],
-    pub additional_motion_offset: Option<[i8; 2]>,
+    pub forced_motion_offset: Option<[i8; 2]>,
     pub repeating: bool,
     pub can_capture: bool,
     pub can_move: bool,
@@ -72,7 +72,7 @@ pub struct PieceMove {
 impl PieceMove {
     pub const DEFAULT: Self = Self {
         offset: [0; 2],
-        additional_motion_offset: None,
+        forced_motion_offset: None,
         repeating: false,
         can_capture: true,
         can_move: true,
@@ -84,8 +84,8 @@ impl PieceMove {
         self.offset.map(|x| x as isize)
     }
 
-    pub fn additional_motion_offset(self) -> Option<[isize; 2]> {
-        self.additional_motion_offset.map(|a| a.map(|x| x as isize))
+    pub fn forced_motion_offset(self) -> Option<[isize; 2]> {
+        self.forced_motion_offset.map(|a| a.map(|x| x as isize))
     }
 
     pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
@@ -113,16 +113,19 @@ impl PieceMove {
     }
 
     /// Returns None if there is an overflow
-    pub fn apply_additional_motion_offset_to(self, position: [isize; 2]) -> Option<[isize; 2]> {
-        if let Some(offset) = self.additional_motion_offset() {
-            let [Some(rank), Some(file)] = [0, 1].map(|i| position[i].checked_add(offset[i]))
-            else {
+    pub fn apply_additional_motion_offset_to_move(
+        self,
+        from: [isize; 2],
+        to: [isize; 2],
+    ) -> Option<[isize; 2]> {
+        if let Some(offset) = self.forced_motion_offset() {
+            let [Some(rank), Some(file)] = [0, 1].map(|i| from[i].checked_add(offset[i])) else {
                 return None;
             };
 
             Some([rank, file])
         } else {
-            Some(position)
+            Some(to)
         }
     }
 }

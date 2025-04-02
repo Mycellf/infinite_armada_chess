@@ -72,7 +72,7 @@ impl ChessBoard {
             return Err(());
         }
 
-        if let Some(_) = piece_move.additional_motion_offset() {
+        if let Some(_) = piece_move.forced_motion_offset() {
             let Some(captured_tile) = self.get_piece_expanding(to) else {
                 return Err(());
             };
@@ -80,7 +80,9 @@ impl ChessBoard {
             *captured_tile = None;
         }
 
-        let destination = piece_move.apply_additional_motion_offset_to(to).unwrap();
+        let destination = piece_move
+            .apply_additional_motion_offset_to_move(from, to)
+            .unwrap();
 
         let Some(ending_tile) = self.get_piece_expanding(destination) else {
             return Err(());
@@ -154,9 +156,9 @@ impl ChessBoard {
             }
         }
 
-        if let Some(_) = piece_move.additional_motion_offset() {
+        if let Some(_) = piece_move.forced_motion_offset() {
             // HACK: See above note about overflows
-            let destination = piece_move.apply_additional_motion_offset_to(to)?;
+            let destination = piece_move.apply_additional_motion_offset_to_move(from, to)?;
 
             let Some(None) = self.get_piece(destination) else {
                 return None;
@@ -191,7 +193,9 @@ impl ChessBoard {
         to: [isize; 2],
         piece_move: PieceMove,
     ) -> bool {
-        let destination = piece_move.apply_additional_motion_offset_to(to).unwrap();
+        let destination = piece_move
+            .apply_additional_motion_offset_to_move(from, to)
+            .unwrap();
 
         let map_tile = |tile| {
             if tile == destination {
