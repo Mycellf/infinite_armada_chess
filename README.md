@@ -1,6 +1,5 @@
 Todo: 
 
-* Add pawn promotion
 * Detect checkmate
 
 Instructions: 
@@ -9,6 +8,7 @@ Instructions:
 * Click pieces to select them and move them
 * Hold `shift` while selecting an empty tile to select the first piece below it
 * Type `:`, a rank number, then `enter` to jump to it
+  * When promoting a pawn, this will in stead select the nth option from the top
 * Type `tile1 tile2` then `enter` to make a move from one tile to another (ex `c-10 c20`)
 * Press `1`, `2`, or `3` to select a zoom level
 
