@@ -24,11 +24,11 @@ pub struct ChessBoard {
     pub turn: PieceTeam,
     pub king_positions: [[isize; 2]; 2],
     pub opportunity_location: Option<[isize; 2]>,
-    pub selection_kind: SelectionKind,
+    pub selection_mode: SelectionMode,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub enum SelectionKind {
+pub enum SelectionMode {
     MovePiece,
     PromotePiece([isize; 2]),
 }
@@ -53,13 +53,13 @@ impl ChessBoard {
             turn: PieceTeam::White,
             king_positions: [[7, 4], [0, 4]],
             opportunity_location: None,
-            selection_kind: SelectionKind::MovePiece,
+            selection_mode: SelectionMode::MovePiece,
         }
     }
 
     // Returns true if the camera should be flipped
     pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<bool, ()> {
-        let SelectionKind::MovePiece = self.selection_kind else {
+        let SelectionMode::MovePiece = self.selection_mode else {
             return Err(());
         };
 
@@ -139,12 +139,46 @@ impl ChessBoard {
         }
 
         if Some(destination[0]) == starting_piece.upgrade_rank() {
-            self.selection_kind = SelectionKind::PromotePiece(destination);
+            self.selection_mode = SelectionMode::PromotePiece(destination);
             Ok(false)
         } else {
             self.turn = self.turn.opposite();
             Ok(true)
         }
+    }
+
+    pub fn select_promotion(&mut self, index: usize) -> Result<(), ()> {
+        let SelectionMode::PromotePiece(location) = self.selection_mode else {
+            return Err(());
+        };
+
+        if index >= 4 {
+            return Err(());
+        }
+
+        let Some(Some(selected_piece)) = self.get_piece_mut(location) else {
+            return Err(());
+        };
+
+        selected_piece.kind = (selected_piece.upgrade_kinds())
+            .expect("The piece being promoted should have a valid set of upgrades.")[index];
+
+        self.turn = self.turn.opposite();
+        self.selection_mode = SelectionMode::MovePiece;
+        Ok(())
+    }
+
+    pub fn upgrade_options(&self) -> Option<&'static [PieceKind]> {
+        let SelectionMode::PromotePiece(location) = self.selection_mode else {
+            return None;
+        };
+
+        let selected_piece = self.get_piece(location).unwrap().unwrap();
+
+        Some(
+            (selected_piece.upgrade_kinds())
+                .expect("The piece being promoted should have a valid set of upgrades."),
+        )
     }
 
     pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> Option<PieceMove> {

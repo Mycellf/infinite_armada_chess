@@ -31,7 +31,21 @@ impl ChessPiece {
             _ => None,
         }
     }
+
+    pub fn upgrade_kinds(self) -> Option<&'static [PieceKind]> {
+        match self.kind {
+            PieceKind::Pawn => Some(&PAWN_UPGRADES),
+            _ => None,
+        }
+    }
 }
+
+static PAWN_UPGRADES: [PieceKind; 4] = [
+    PieceKind::Bishop,
+    PieceKind::Knight,
+    PieceKind::Rook,
+    PieceKind::Queen,
+];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PieceTeam {

@@ -3,7 +3,7 @@ pub mod chess_piece;
 pub mod command_input;
 pub mod textures;
 
-use chess_board::ChessBoard;
+use chess_board::{ChessBoard, SelectionMode};
 use chess_piece::PieceTeam;
 use command_input::{CommandInput, MoveCommand};
 use macroquad::{
@@ -28,6 +28,10 @@ async fn main() {
         target: [ChessBoard::RANK_WIDTH / 2.0, SCREEN_START_POSITION].into(),
         ..Default::default()
     };
+
+    fn flip_camera(camera: &mut Camera2D) {
+        camera.target.y = -camera.target.y + 2.0 * SCREEN_START_POSITION;
+    }
 
     let mut ui_camera = Camera2D {
         zoom: [1.0, 2.0 / 10.0].into(),
@@ -73,6 +77,41 @@ async fn main() {
             }
 
             let mouse_position = world_camera.screen_to_world(input::mouse_position().into());
+
+            if let SelectionMode::PromotePiece(location) = board.selection_mode {
+                let clicked_tile = board.tile_at_position(mouse_position.into());
+
+                let Some(rank) = clicked_tile[0].checked_add(rank_offset) else {
+                    break 'outer;
+                };
+
+                let clicked_tile = [rank, clicked_tile[1]];
+
+                if clicked_tile[0] != location[0] {
+                    break 'outer;
+                }
+
+                let mut selected_index = clicked_tile[1] - location[1];
+
+                if PieceTeam::Black == board.turn {
+                    selected_index = -selected_index;
+                };
+
+                if location[1] >= (chess_board::NUM_FILES / 2) as isize {
+                    selected_index += board.upgrade_options().unwrap().len() as isize;
+                }
+
+                if input::is_key_down(KeyCode::Key0) {
+                    break 'outer;
+                }
+
+                if let Ok(()) = board.select_promotion(selected_index as usize) {
+                    flip_camera(&mut world_camera);
+                }
+
+                break 'outer;
+            }
+
             let clicked_tile = board.tile_at_position_bounded(mouse_position.into());
 
             let Some(end_tile) = clicked_tile else {
@@ -111,7 +150,7 @@ async fn main() {
             };
 
             if let Ok(true) = board.move_piece(start_tile, end_tile) {
-                world_camera.target.y = -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                flip_camera(&mut world_camera);
             }
 
             selected_tile = None;
@@ -120,10 +159,9 @@ async fn main() {
         if let Some(command) = command_input.update() {
             match command {
                 MoveCommand::MovePiece { start, end } => {
-                    if let Ok(flip_camera) = board.move_piece(start, end) {
-                        if flip_camera {
-                            world_camera.target.y =
-                                -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                    if let Ok(flip_camera_a) = board.move_piece(start, end) {
+                        if flip_camera_a {
+                            flip_camera(&mut world_camera);
                         }
                         command_input.command.clear();
                     }
@@ -181,7 +219,11 @@ async fn main() {
             world_camera.target.y - screen_height / 2.0 + 0.5,
             world_camera.target.y + screen_height / 2.0 - 0.5,
             rank_offset,
-            selected_tile,
+            if let SelectionMode::PromotePiece(location) = board.selection_mode {
+                Some(location)
+            } else {
+                selected_tile
+            },
         );
 
         camera::set_camera(&ui_camera);
