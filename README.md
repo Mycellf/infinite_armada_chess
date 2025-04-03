@@ -4,6 +4,7 @@ Todo:
 * Detect checkmate
 
 Instructions: 
+
 * Use arrow keys to pan and shift to pan faster
 * Click pieces to select them and move them
 * Hold `shift` while selecting an empty tile to select the first piece below it
