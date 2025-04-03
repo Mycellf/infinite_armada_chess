@@ -656,12 +656,12 @@ static QUEEN_RANK_BLACK: Rank =
 #[rustfmt::skip]
 static KING_RANK_BLACK: Rank = [
     Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
-    None,//Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
-    None,//Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
-    None,//Some(ChessPiece::new(PieceKind::Queen,  PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Queen,  PieceTeam::Black)),
     Some(ChessPiece::new(PieceKind::King,   PieceTeam::Black)),
-    None,//Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
-    None,//Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
     Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
 ];
 
