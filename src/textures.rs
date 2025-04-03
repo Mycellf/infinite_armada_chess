@@ -5,7 +5,7 @@ use macroquad::texture::{FilterMode, Image, Texture2D};
 use crate::chess_piece::{ChessPiece, PieceKind, PieceTeam};
 
 impl ChessPiece {
-    pub fn texture(&self) -> &Texture2D {
+    pub fn texture(&self) -> &'static Texture2D {
         match self.team {
             PieceTeam::Black => match self.kind {
                 PieceKind::Pawn => &BLACK_PAWN_TEXTURE,
