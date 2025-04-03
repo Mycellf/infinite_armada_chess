@@ -87,21 +87,19 @@ async fn main() {
 
                 let clicked_tile = [rank, clicked_tile[1]];
 
-                if clicked_tile[0] != location[0] {
+                if clicked_tile[1] != location[1] {
                     break 'outer;
                 }
 
-                let mut selected_index = clicked_tile[1] - location[1];
+                let mut selected_index = location[0] - clicked_tile[0];
 
                 if PieceTeam::Black == board.turn {
                     selected_index = -selected_index;
                 };
 
-                if location[1] >= (chess_board::NUM_FILES / 2) as isize {
-                    selected_index += board.upgrade_options().unwrap().len() as isize;
-                }
+                selected_index -= 1;
 
-                if input::is_key_down(KeyCode::Key0) {
+                if selected_index < 0 {
                     break 'outer;
                 }
 

@@ -41,10 +41,10 @@ impl ChessPiece {
 }
 
 static PAWN_UPGRADES: [PieceKind; 4] = [
+    PieceKind::Queen,
+    PieceKind::Rook,
     PieceKind::Bishop,
     PieceKind::Knight,
-    PieceKind::Rook,
-    PieceKind::Queen,
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
