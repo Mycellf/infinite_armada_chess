@@ -295,10 +295,10 @@ impl ChessBoard {
         let map_tile = |tile| {
             if tile == destination {
                 Some(from)
-            } else if tile == from || tile == to {
-                None
             } else if Some(Some(tile)) == captured_destination {
                 Some(to)
+            } else if tile == from || tile == to {
+                None
             } else {
                 Some(tile)
             }
