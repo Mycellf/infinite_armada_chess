@@ -1,8 +1,6 @@
 Todo: 
 
-* Add castling
 * Add pawn promotion
-* Add en passant
 * Detect checkmate
 
 Instructions: 
