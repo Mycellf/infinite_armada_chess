@@ -24,6 +24,13 @@ pub struct ChessBoard {
     pub turn: PieceTeam,
     pub king_positions: [[isize; 2]; 2],
     pub opportunity_location: Option<[isize; 2]>,
+    pub selection_kind: SelectionKind,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum SelectionKind {
+    MovePiece,
+    PromotePiece([isize; 2]),
 }
 
 impl ChessBoard {
@@ -46,10 +53,16 @@ impl ChessBoard {
             turn: PieceTeam::White,
             king_positions: [[7, 4], [0, 4]],
             opportunity_location: None,
+            selection_kind: SelectionKind::MovePiece,
         }
     }
 
-    pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<(), ()> {
+    // Returns true if the camera should be flipped
+    pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<bool, ()> {
+        let SelectionKind::MovePiece = self.selection_kind else {
+            return Err(());
+        };
+
         let turn = self.turn;
 
         let Some(starting_tile) = self.get_piece(from) else {
@@ -119,15 +132,19 @@ impl ChessBoard {
 
         *starting_tile = None;
 
-        self.turn = self.turn.opposite();
-
         if piece_move.provokes_opportunity {
             self.opportunity_location = Some(destination);
         } else {
             self.opportunity_location = None;
         }
 
-        Ok(())
+        if Some(destination[0]) == starting_piece.upgrade_rank() {
+            self.selection_kind = SelectionKind::PromotePiece(destination);
+            Ok(false)
+        } else {
+            self.turn = self.turn.opposite();
+            Ok(true)
+        }
     }
 
     pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> Option<PieceMove> {

@@ -110,7 +110,7 @@ async fn main() {
                 }
             };
 
-            if let Ok(()) = board.move_piece(start_tile, end_tile) {
+            if let Ok(true) = board.move_piece(start_tile, end_tile) {
                 world_camera.target.y = -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
             }
 
@@ -120,9 +120,11 @@ async fn main() {
         if let Some(command) = command_input.update() {
             match command {
                 MoveCommand::MovePiece { start, end } => {
-                    if let Ok(()) = board.move_piece(start, end) {
-                        world_camera.target.y =
-                            -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                    if let Ok(flip_camera) = board.move_piece(start, end) {
+                        if flip_camera {
+                            world_camera.target.y =
+                                -world_camera.target.y + 2.0 * SCREEN_START_POSITION;
+                        }
                         command_input.command.clear();
                     }
                 }
