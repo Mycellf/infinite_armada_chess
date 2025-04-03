@@ -165,14 +165,22 @@ async fn main() {
                     }
                 }
                 MoveCommand::MoveView { rank } => {
-                    world_camera.target.y = 0.5 * ChessBoard::RANK_HEIGHT;
-                    if board.turn == PieceTeam::Black {
-                        rank_offset =
-                            rank.saturating_sub((chess_board::NUM_TRADITIONAL_RANKS - 1) as isize);
+                    if let SelectionMode::PromotePiece(..) = board.selection_mode {
+                        if rank < 0 {
+                        } else if let Ok(()) = board.select_promotion(rank as usize) {
+                            flip_camera(&mut world_camera);
+                            command_input.command.clear();
+                        }
                     } else {
-                        rank_offset = rank;
+                        world_camera.target.y = 0.5 * ChessBoard::RANK_HEIGHT;
+                        if board.turn == PieceTeam::Black {
+                            rank_offset = rank
+                                .saturating_sub((chess_board::NUM_TRADITIONAL_RANKS - 1) as isize);
+                        } else {
+                            rank_offset = rank;
+                        }
+                        command_input.command.clear();
                     }
-                    command_input.command.clear();
                 }
                 MoveCommand::Home => {
                     world_camera.target.y = SCREEN_START_POSITION;
