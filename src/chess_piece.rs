@@ -24,6 +24,13 @@ impl ChessPiece {
             ..self
         }
     }
+
+    pub fn upgrade_rank(self) -> Option<isize> {
+        match self.kind {
+            PieceKind::Pawn => Some(self.team.pawn_upgrade_rank()),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -33,10 +40,10 @@ pub enum PieceTeam {
 }
 
 impl PieceTeam {
-    pub const fn pawn_upgrade_rank(self) -> usize {
+    pub const fn pawn_upgrade_rank(self) -> isize {
         match self {
             PieceTeam::Black => 0,
-            PieceTeam::White => chess_board::NUM_TRADITIONAL_RANKS - 1,
+            PieceTeam::White => (chess_board::NUM_TRADITIONAL_RANKS - 1) as isize,
         }
     }
 
