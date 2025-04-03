@@ -519,6 +519,46 @@ impl ChessBoard {
         };
     }
 
+    pub fn draw_piece_selection(&self, offset: isize) {
+        let SelectionMode::PromotePiece(location) = self.selection_mode else {
+            return;
+        };
+
+        let selected_piece = self.get_piece(location).unwrap().unwrap();
+        let upgrade_kinds = (selected_piece.upgrade_kinds())
+            .expect("The piece being promoted should have a valid set of upgrades.");
+
+        let visual_file = if PieceTeam::Black == self.turn {
+            self.invert_file(location[1])
+        } else {
+            location[1]
+        };
+
+        let width = Self::TILE_SIZE;
+        let height = upgrade_kinds.len() as f32 * Self::RANK_HEIGHT;
+
+        let x_corner = visual_file as f32 * Self::TILE_SIZE;
+        let y_corner = self.height_of_rank(location[0] - offset);
+
+        shapes::draw_rectangle(x_corner, y_corner - height, width, height, colors::WHITE);
+
+        for i in 0..upgrade_kinds.len() {
+            let texture = ChessPiece::new(upgrade_kinds[i], self.turn).texture();
+
+            texture::draw_texture_ex(
+                texture,
+                x_corner,
+                y_corner - Self::RANK_HEIGHT * (i + 1) as f32,
+                colors::WHITE,
+                DrawTextureParams {
+                    dest_size: Some([Self::TILE_SIZE; 2].into()),
+                    flip_y: true,
+                    ..Default::default()
+                },
+            )
+        }
+    }
+
     pub fn height_of_rank(&self, rank: isize) -> f32 {
         let rank = if let PieceTeam::Black = self.turn {
             self.invert_rank(rank)

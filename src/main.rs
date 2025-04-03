@@ -224,6 +224,8 @@ async fn main() {
             },
         );
 
+        board.draw_piece_selection(rank_offset);
+
         camera::set_camera(&ui_camera);
 
         command_input.draw();
