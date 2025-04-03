@@ -103,7 +103,7 @@ static QUEEN_MOVES: [PieceMove; 8] = [
 ];
 
 #[rustfmt::skip]
-static KING_MOVES: [PieceMove; 8] = [
+static KING_MOVES: [PieceMove; 10] = [
     PieceMove { offset: [1, 0],   ..PieceMove::DEFAULT },
     PieceMove { offset: [1, 1],   ..PieceMove::DEFAULT },
     PieceMove { offset: [0, 1],   ..PieceMove::DEFAULT },
@@ -112,6 +112,10 @@ static KING_MOVES: [PieceMove; 8] = [
     PieceMove { offset: [-1, -1], ..PieceMove::DEFAULT },
     PieceMove { offset: [0, -1],  ..PieceMove::DEFAULT },
     PieceMove { offset: [1, -1],  ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, -1], forced_motion_offset: Some([0, -2]), captured_piece_offset: Some([0, -1]), repeating: true,
+        can_capture_ally: true, forced_capture_kind: Some(PieceKind::Rook), allowed_in_check: false, pieces_must_be_new: true, ..PieceMove::DEFAULT },
+    PieceMove { offset: [0, 1], forced_motion_offset: Some([0, 2]), captured_piece_offset: Some([0, 1]), repeating: true,
+        can_capture_ally: true, forced_capture_kind: Some(PieceKind::Rook), allowed_in_check: false, pieces_must_be_new: true, ..PieceMove::DEFAULT },
 ];
 
 const fn invert_moves<const N: usize>(mut moves: [PieceMove; N]) -> [PieceMove; N] {

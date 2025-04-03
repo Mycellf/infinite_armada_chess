@@ -68,8 +68,28 @@ impl ChessBoard {
             return Err(());
         };
 
-        if self.king_is_in_check_with_move(from, to, piece_move) {
+        if self.king_is_in_check_with_move(from, to, Some(piece_move)) {
             return Err(());
+        }
+
+        if !piece_move.allowed_in_check && self.king_is_in_check() {
+            return Err(());
+        }
+
+        if let Some(destination) = piece_move.apply_captured_piece_offset_to_origin(from) {
+            let Some(captured_tile) = self.get_piece(to) else {
+                return Err(());
+            };
+
+            let Some(ending_tile) = self.get_piece_expanding(destination) else {
+                return Err(());
+            };
+
+            let Some(captured_piece) = captured_tile else {
+                return Err(());
+            };
+
+            *ending_tile = Some(captured_piece.moved());
         }
 
         if let Some(_) = piece_move.forced_motion_offset() {
@@ -149,9 +169,23 @@ impl ChessBoard {
             return None;
         }
 
-        // if the destination tile is another piece, check that it's not an ally
-        if let Some(ChessPiece { team, .. }) = destination_tile {
-            if team == starting_piece.team {
+        if piece_move.pieces_must_be_new && starting_piece.moves != 0 {
+            return None;
+        }
+
+        // check if the destination tile's contents are valid
+        if let Some(ChessPiece { kind, team, moves }) = destination_tile {
+            if team == starting_piece.team && !piece_move.can_capture_ally {
+                return None;
+            }
+
+            if let Some(capture_kind) = piece_move.forced_capture_kind {
+                if kind != capture_kind {
+                    return None;
+                }
+            }
+
+            if piece_move.pieces_must_be_new && moves != 0 {
                 return None;
             }
         }
@@ -161,6 +195,16 @@ impl ChessBoard {
             let destination = piece_move.apply_additional_motion_offset_to_move(from, to)?;
 
             let Some(None) = self.get_piece(destination) else {
+                return None;
+            };
+        }
+
+        if let Some(_) = piece_move.captured_piece_offset() {
+            // HACK: See above note about overflows
+            let captured_piece_destination =
+                piece_move.apply_captured_piece_offset_to_origin(from)?;
+
+            let Some(None) = self.get_piece(captured_piece_destination) else {
                 return None;
             };
         }
@@ -187,21 +231,34 @@ impl ChessBoard {
         Some(piece_move)
     }
 
+    pub fn king_is_in_check(&self) -> bool {
+        self.king_is_in_check_with_move([0, 0], [0, 0], None)
+    }
+
     pub fn king_is_in_check_with_move(
         &self,
         from: [isize; 2],
         to: [isize; 2],
-        piece_move: PieceMove,
+        piece_move: Option<PieceMove>,
     ) -> bool {
-        let destination = piece_move
-            .apply_additional_motion_offset_to_move(from, to)
-            .unwrap();
+        let destination = if let Some(piece_move) = piece_move {
+            piece_move
+                .apply_additional_motion_offset_to_move(from, to)
+                .unwrap()
+        } else {
+            to
+        };
+
+        let captured_destination =
+            piece_move.map(|m| m.apply_captured_piece_offset_to_origin(from));
 
         let map_tile = |tile| {
             if tile == destination {
                 Some(from)
             } else if tile == from || tile == to {
                 None
+            } else if Some(Some(tile)) == captured_destination {
+                Some(to)
             } else {
                 Some(tile)
             }
@@ -599,12 +656,12 @@ static QUEEN_RANK_BLACK: Rank =
 #[rustfmt::skip]
 static KING_RANK_BLACK: Rank = [
     Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Queen,  PieceTeam::Black)),
+    None,//Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    None,//Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    None,//Some(ChessPiece::new(PieceKind::Queen,  PieceTeam::Black)),
     Some(ChessPiece::new(PieceKind::King,   PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
-    Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
+    None,//Some(ChessPiece::new(PieceKind::Bishop, PieceTeam::Black)),
+    None,//Some(ChessPiece::new(PieceKind::Knight, PieceTeam::Black)),
     Some(ChessPiece::new(PieceKind::Rook,   PieceTeam::Black)),
 ];
 

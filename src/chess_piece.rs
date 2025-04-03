@@ -62,22 +62,32 @@ pub enum PieceKind {
 pub struct PieceMove {
     pub offset: [i8; 2],
     pub forced_motion_offset: Option<[i8; 2]>,
+    pub captured_piece_offset: Option<[i8; 2]>,
     pub repeating: bool,
     pub can_capture: bool,
+    pub can_capture_ally: bool,
     pub can_move: bool,
     pub provokes_opportunity: bool,
     pub requires_opportunity: bool,
+    pub allowed_in_check: bool,
+    pub forced_capture_kind: Option<PieceKind>,
+    pub pieces_must_be_new: bool,
 }
 
 impl PieceMove {
     pub const DEFAULT: Self = Self {
         offset: [0; 2],
         forced_motion_offset: None,
+        captured_piece_offset: None,
         repeating: false,
         can_capture: true,
+        can_capture_ally: false,
         can_move: true,
         provokes_opportunity: false,
         requires_opportunity: false,
+        allowed_in_check: true,
+        forced_capture_kind: None,
+        pieces_must_be_new: false,
     };
 
     pub fn offset(self) -> [isize; 2] {
@@ -86,6 +96,10 @@ impl PieceMove {
 
     pub fn forced_motion_offset(self) -> Option<[isize; 2]> {
         self.forced_motion_offset.map(|a| a.map(|x| x as isize))
+    }
+
+    pub fn captured_piece_offset(self) -> Option<[isize; 2]> {
+        self.captured_piece_offset.map(|a| a.map(|x| x as isize))
     }
 
     pub fn is_offset_valid(self, offset: [isize; 2]) -> bool {
@@ -126,6 +140,19 @@ impl PieceMove {
             Some([rank, file])
         } else {
             Some(to)
+        }
+    }
+
+    /// Returns None if there is an overflow or there is no offset selected
+    pub fn apply_captured_piece_offset_to_origin(self, from: [isize; 2]) -> Option<[isize; 2]> {
+        if let Some(offset) = self.captured_piece_offset() {
+            let [Some(rank), Some(file)] = [0, 1].map(|i| from[i].checked_add(offset[i])) else {
+                return None;
+            };
+
+            Some([rank, file])
+        } else {
+            None
         }
     }
 }
