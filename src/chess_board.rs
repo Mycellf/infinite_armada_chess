@@ -134,27 +134,26 @@ impl ChessBoard {
         }
     }
 
-    pub fn select_promotion(&mut self, index: usize) -> Result<(), ()> {
+    #[must_use]
+    pub fn select_promotion(&mut self, index: usize) -> Option<()> {
         let SelectionMode::PromotePiece(location) = self.selection_mode else {
-            return Err(());
+            return None;
         };
 
-        let Some(Some(selected_piece)) = self.get_piece_mut(location) else {
-            return Err(());
-        };
+        let selected_piece = self.get_piece_mut(location)?.as_mut()?;
 
         let upgrade_kinds = (selected_piece.upgrade_kinds())
             .expect("The piece being promoted should have a valid set of upgrades.");
 
         if index >= upgrade_kinds.len() {
-            return Err(());
+            return None;
         }
 
         selected_piece.kind = upgrade_kinds[index];
 
         self.turn = self.turn.opposite();
         self.selection_mode = SelectionMode::MovePiece;
-        Ok(())
+        Some(())
     }
 
     pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> Option<PieceMove> {

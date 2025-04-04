@@ -103,7 +103,7 @@ async fn main() {
                     break 'outer;
                 }
 
-                if let Ok(()) = board.select_promotion(selected_index as usize) {
+                if board.select_promotion(selected_index as usize).is_some() {
                     flip_camera(&mut world_camera);
                 }
 
@@ -167,7 +167,7 @@ async fn main() {
                 MoveCommand::MoveView { rank } => {
                     if let SelectionMode::PromotePiece(..) = board.selection_mode {
                         if rank < 0 {
-                        } else if let Ok(()) = board.select_promotion(rank as usize) {
+                        } else if board.select_promotion(rank as usize).is_some() {
                             flip_camera(&mut world_camera);
                             command_input.command.clear();
                         }
