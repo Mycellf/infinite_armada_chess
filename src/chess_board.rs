@@ -68,9 +68,7 @@ impl ChessBoard {
 
         let turn = self.turn;
 
-        let starting_tile = self.get_piece(from)?;
-
-        let starting_piece = starting_tile?;
+        let starting_piece = self.get_piece(from)??;
 
         if starting_piece.team != turn {
             return None;
