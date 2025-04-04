@@ -157,7 +157,7 @@ impl MoveCommand {
     }
 
     fn parse_view_command<'a>(mut tokens: impl Iterator<Item = &'a str>) -> Option<Self> {
-        let (":", destination) = tokens.next()?.split_at(1) else {
+        let (":", destination) = tokens.next()?.split_at_checked(1)? else {
             return None;
         };
 
