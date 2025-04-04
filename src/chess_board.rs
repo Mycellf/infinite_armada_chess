@@ -60,48 +60,49 @@ impl Default for ChessBoard {
 
 impl ChessBoard {
     // Returns true if the camera should be flipped
-    pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<bool, ()> {
+    #[must_use]
+    pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Option<bool> {
         let SelectionMode::MovePiece = self.selection_mode else {
-            return Err(());
+            return None;
         };
 
         let turn = self.turn;
 
         let Some(starting_tile) = self.get_piece(from) else {
-            return Err(());
+            return None;
         };
 
         let Some(starting_piece) = starting_tile else {
-            return Err(());
+            return None;
         };
 
         if starting_piece.team != turn {
-            return Err(());
+            return None;
         }
 
         let Some(piece_move) = self.check_move(from, to) else {
-            return Err(());
+            return None;
         };
 
         if self.king_is_in_check_with_move(from, to, Some(piece_move)) {
-            return Err(());
+            return None;
         }
 
         if !piece_move.allowed_in_check && self.king_is_in_check() {
-            return Err(());
+            return None;
         }
 
         if let Some(destination) = piece_move.apply_captured_piece_offset_to_origin(from) {
             let Some(captured_tile) = self.get_piece(to) else {
-                return Err(());
+                return None;
             };
 
             let Some(ending_tile) = self.get_piece_expanding(destination) else {
-                return Err(());
+                return None;
             };
 
             let Some(captured_piece) = captured_tile else {
-                return Err(());
+                return None;
             };
 
             *ending_tile = Some(captured_piece.moved());
@@ -109,7 +110,7 @@ impl ChessBoard {
 
         if let Some(_) = piece_move.forced_motion_offset() {
             let Some(captured_tile) = self.get_piece_expanding(to) else {
-                return Err(());
+                return None;
             };
 
             *captured_tile = None;
@@ -120,7 +121,7 @@ impl ChessBoard {
             .unwrap();
 
         let Some(ending_tile) = self.get_piece_expanding(destination) else {
-            return Err(());
+            return None;
         };
 
         *ending_tile = Some(starting_piece.moved());
@@ -142,10 +143,10 @@ impl ChessBoard {
 
         if Some(destination[0]) == starting_piece.upgrade_rank() {
             self.selection_mode = SelectionMode::PromotePiece(destination);
-            Ok(false)
+            Some(false)
         } else {
             self.turn = self.turn.opposite();
-            Ok(true)
+            Some(true)
         }
     }
 

@@ -147,7 +147,7 @@ async fn main() {
                 }
             };
 
-            if let Ok(true) = board.move_piece(start_tile, end_tile) {
+            if let Some(true) = board.move_piece(start_tile, end_tile) {
                 flip_camera(&mut world_camera);
             }
 
@@ -157,7 +157,7 @@ async fn main() {
         if let Some(command) = command_input.update() {
             match command {
                 MoveCommand::MovePiece { start, end } => {
-                    if let Ok(flip_camera_a) = board.move_piece(start, end) {
+                    if let Some(flip_camera_a) = board.move_piece(start, end) {
                         if flip_camera_a {
                             flip_camera(&mut world_camera);
                         }
