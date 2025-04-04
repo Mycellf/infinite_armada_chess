@@ -157,13 +157,9 @@ impl ChessBoard {
     }
 
     pub fn check_move(&self, from: [isize; 2], to: [isize; 2]) -> Option<PieceMove> {
-        let Some(Some(starting_piece)) = self.get_piece(from) else {
-            return None;
-        };
+        let starting_piece = self.get_piece(from)??;
 
-        let Some(destination_tile) = self.get_piece(to) else {
-            return None;
-        };
+        let destination_tile = self.get_piece(to)?;
 
         // HACK: There is an overflow if the player attempts to make a move with magnitude more
         // than isize can fit. If such an overflow happens, the game would need to be big enough
@@ -177,12 +173,8 @@ impl ChessBoard {
         let offset = [rank_offset, file_offset];
 
         // find the move being referenced
-        let Some(&piece_move) = (starting_piece.moves().iter())
-            .filter(|&&piece_move| piece_move.is_offset_valid(offset))
-            .next()
-        else {
-            return None;
-        };
+        let piece_move = *(starting_piece.moves().iter())
+            .find(|&&piece_move| piece_move.is_offset_valid(offset))?;
 
         if piece_move.requires_opportunity && self.opportunity_location != Some(to) {
             return None;
@@ -216,7 +208,7 @@ impl ChessBoard {
             }
         }
 
-        if let Some(_) = piece_move.forced_motion_offset() {
+        if piece_move.forced_motion_offset().is_some() {
             // HACK: See above note about overflows
             let destination = piece_move.apply_additional_motion_offset_to_move(from, to)?;
 
@@ -225,7 +217,7 @@ impl ChessBoard {
             };
         }
 
-        if let Some(_) = piece_move.captured_piece_offset() {
+        if piece_move.captured_piece_offset().is_some() {
             // HACK: See above note about overflows
             let captured_piece_destination =
                 piece_move.apply_captured_piece_offset_to_origin(from)?;
