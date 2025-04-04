@@ -41,7 +41,7 @@ async fn main() {
 
     let mut fullscreen = false;
 
-    let mut board = ChessBoard::new();
+    let mut board = ChessBoard::default();
     let mut selected_tile = None;
 
     let mut command_input = CommandInput::default();

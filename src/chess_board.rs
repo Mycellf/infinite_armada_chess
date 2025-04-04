@@ -33,8 +33,8 @@ pub enum SelectionMode {
     PromotePiece([isize; 2]),
 }
 
-impl ChessBoard {
-    pub fn new() -> Self {
+impl Default for ChessBoard {
+    fn default() -> Self {
         let mut ranks = VecDeque::with_capacity(NUM_TRADITIONAL_RANKS);
 
         ranks.push_back(KING_RANK_WHITE);
@@ -56,7 +56,9 @@ impl ChessBoard {
             selection_mode: SelectionMode::MovePiece,
         }
     }
+}
 
+impl ChessBoard {
     // Returns true if the camera should be flipped
     pub fn move_piece(&mut self, from: [isize; 2], to: [isize; 2]) -> Result<bool, ()> {
         let SelectionMode::MovePiece = self.selection_mode else {
