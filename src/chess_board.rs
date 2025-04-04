@@ -68,21 +68,15 @@ impl ChessBoard {
 
         let turn = self.turn;
 
-        let Some(starting_tile) = self.get_piece(from) else {
-            return None;
-        };
+        let starting_tile = self.get_piece(from)?;
 
-        let Some(starting_piece) = starting_tile else {
-            return None;
-        };
+        let starting_piece = starting_tile?;
 
         if starting_piece.team != turn {
             return None;
         }
 
-        let Some(piece_move) = self.check_move(from, to) else {
-            return None;
-        };
+        let piece_move = self.check_move(from, to)?;
 
         if self.king_is_in_check_with_move(from, to, Some(piece_move)) {
             return None;
@@ -93,25 +87,17 @@ impl ChessBoard {
         }
 
         if let Some(destination) = piece_move.apply_captured_piece_offset_to_origin(from) {
-            let Some(captured_tile) = self.get_piece(to) else {
-                return None;
-            };
+            let captured_tile = self.get_piece(to)?;
 
-            let Some(ending_tile) = self.get_piece_expanding(destination) else {
-                return None;
-            };
+            let ending_tile = self.get_piece_expanding(destination)?;
 
-            let Some(captured_piece) = captured_tile else {
-                return None;
-            };
+            let captured_piece = captured_tile?;
 
             *ending_tile = Some(captured_piece.moved());
         }
 
-        if let Some(_) = piece_move.forced_motion_offset() {
-            let Some(captured_tile) = self.get_piece_expanding(to) else {
-                return None;
-            };
+        if piece_move.forced_motion_offset().is_some() {
+            let captured_tile = self.get_piece_expanding(to)?;
 
             *captured_tile = None;
         }
@@ -120,9 +106,7 @@ impl ChessBoard {
             .apply_additional_motion_offset_to_move(from, to)
             .unwrap();
 
-        let Some(ending_tile) = self.get_piece_expanding(destination) else {
-            return None;
-        };
+        let ending_tile = self.get_piece_expanding(destination)?;
 
         *ending_tile = Some(starting_piece.moved());
         if let PieceKind::King = starting_piece.kind {
