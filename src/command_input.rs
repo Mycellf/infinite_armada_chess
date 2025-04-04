@@ -47,7 +47,7 @@ impl CommandInput {
     }
 
     pub fn last_character(&self) -> Option<char> {
-        self.command.chars().rev().next()
+        self.command.chars().next_back()
     }
 
     pub fn is_next_character_valid(&self, character: char) -> bool {
@@ -125,7 +125,7 @@ impl CommandInput {
 }
 
 fn is_valid_file(character: char) -> bool {
-    character >= 'a' && character < ('a' as u8 + chess_board::NUM_FILES as u8) as char
+    character >= 'a' && character < (b'a' + chess_board::NUM_FILES as u8) as char
 }
 
 pub enum MoveCommand {
@@ -138,7 +138,7 @@ impl MoveCommand {
     pub fn from_command(command: &str) -> Option<Self> {
         let tokens = command.split_whitespace();
 
-        if command.chars().next() == Some(':') {
+        if command.starts_with(':') {
             Self::parse_view_command(tokens)
         } else {
             Self::parse_move_command(tokens)
@@ -183,7 +183,7 @@ pub fn parse_position(position: &str) -> Option<[isize; 2]> {
         return None;
     }
 
-    let file = (file as u8 - 'a' as u8) as isize;
+    let file = (file as u8 - b'a') as isize;
 
     let rank = rank.parse::<isize>().ok()? - 1;
 
