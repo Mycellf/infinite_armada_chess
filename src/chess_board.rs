@@ -407,7 +407,7 @@ impl ChessBoard {
         for file in 0..NUM_FILES {
             let tile_x = self.x_position_of_file(file as isize) + Self::TILE_SIZE / 2.0;
 
-            let file_string = (('a' as u8 + file as u8) as char).to_string();
+            let file_string = ((b'a' + file as u8) as char).to_string();
 
             let foreground = colors::GRAY;
             let background = colors::BLANK;
@@ -452,7 +452,7 @@ impl ChessBoard {
 
         let rank_contents = self.get_rank(rank);
 
-        for file in 0..rank_contents.len() {
+        for (file, tile) in rank_contents.iter().enumerate() {
             let tile_x = self.x_position_of_file(file as isize);
 
             let tile_color = if highlighted_file == Some(file as isize) {
@@ -465,7 +465,7 @@ impl ChessBoard {
 
             shapes::draw_rectangle(tile_x, height, Self::TILE_SIZE, Self::TILE_SIZE, tile_color);
 
-            if let Some(piece) = rank_contents[file] {
+            if let Some(piece) = tile {
                 texture::draw_texture_ex(
                     piece.texture(),
                     tile_x,
@@ -520,8 +520,8 @@ impl ChessBoard {
 
         shapes::draw_rectangle(x_corner, y_corner - height, width, height, colors::WHITE);
 
-        for i in 0..upgrade_kinds.len() {
-            let texture = ChessPiece::new(upgrade_kinds[i], self.turn).texture();
+        for (i, &piece_kind) in upgrade_kinds.iter().enumerate() {
+            let texture = ChessPiece::new(piece_kind, self.turn).texture();
 
             texture::draw_texture_ex(
                 texture,
@@ -587,7 +587,7 @@ fn draw_boxed_text(
     }
 
     text::draw_text_ex(
-        &text,
+        text,
         x + horizontal_offset,
         y + vertical_offset,
         TextParams {
