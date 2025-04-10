@@ -601,13 +601,19 @@ fn draw_boxed_text(
 impl ChessBoard {
     pub fn expand_to_rank(&mut self, rank: isize) {
         if rank < self.first_rank() {
-            for _ in rank..self.first_rank() {
+            let additional_ranks = (self.first_rank() - rank).try_into().unwrap();
+            self.ranks.reserve(additional_ranks);
+
+            for _ in 0..additional_ranks {
                 self.ranks.push_front(QUEEN_RANK_WHITE);
             }
 
             self.ranks_behind_white = -rank as usize;
         } else if rank > self.last_rank() {
-            for _ in self.last_rank()..rank {
+            let additional_ranks = (rank - self.last_rank()).try_into().unwrap();
+            self.ranks.reserve(additional_ranks);
+
+            for _ in 0..additional_ranks {
                 self.ranks.push_back(QUEEN_RANK_BLACK);
             }
         }
