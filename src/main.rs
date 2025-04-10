@@ -65,7 +65,7 @@ async fn main() {
 
         let scroll_speed = 0.5;
 
-        let input_motion = input::mouse_wheel().1 * scroll_speed
+        let input_motion = input::mouse_wheel().1.clamp(-1.0, 1.0) * scroll_speed
             + input as f32 * pan_speed * time::get_frame_time();
 
         world_camera.target.y += input_motion * zoom_level;
